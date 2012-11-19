@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">pttdroid</string>
+    <string name="settings_name">pttdroid Settings</string>
+    <string name="settings_label">Settings</string>
+    <string name="settings_comm_name">Communication settings</string>
+    <string name="settings_comm_label">Communication</string>
+    <string name="set_cast_and_port">Cast &amp; port</string>
+    <string name="cast_type_title">Cast type</string>
+    <string name="cast_type_summary">Choose how many devices will receive the audio data.</string>
+    <string name="port_title">Port</string>
+    <string name="port_summary"></string>
+    <string name="port_default">2010</string>
+    <string name="set_ip_addr">IP addresses</string>
+    <string name="broadcast_addr_title">Broadcast address</string>
+    <string name="broadcast_addr_summary">Audio data will be received by all devices witch are on the same network.</string>
+    <string name="broadcast_addr_default">255.255.255.255</string>
+    <string name="multicast_addr_title">Multicast address</string>
+    <string name="multicast_addr_summary">Audio data will be received only by devices registered on the given address and are on the same network.</string>
+    <string name="multicast_addr_default">230.0.0.1</string>
+    <string name="unicast_addr_title">Unicast address</string>
+    <string name="unicast_addr_summary">Audio data will be received only by one device, designated by the given address.</string>
+    <string name="unicast_addr_default">192.168.0.1</string>
+    <string name="settings_audio_name">Audio settings</string>
+    <string name="settings_audio_label">Audio</string>
+    <string name="use_speex_title">Use codec</string>
+    <string name="use_speex_on">Turn off</string>
+    <string name="use_speex_off">Turn on</string>
+    <string name="speex_quality_title">Codec bit rate</string>
+    <string name="speex_quality_summary"></string>
+    <string name="echo_title">Echo</string>
+    <string name="echo_on">Turn off</string>
+    <string name="echo_off">Turn on</string>
+    <string name="speaker_title">Speaker</string>
+    <string name="speaker_on">Turn off</string>
+    <string name="speaker_off">Turn on</string>
+    <string name="settings_reset_all_name">Reset All</string>
+    <string name="settings_reset_all_label">Reset All</string>
+    <string name="setting_reset_all_confirm">All settings were restored to their default values</string>
+
+</resources>

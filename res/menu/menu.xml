@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/settings"
+		android:icon="@drawable/settings_icon"
+		android:title="@string/settings_label">		
+		<menu>
+			<item android:id="@+id/settings_comm"
+				android:title="@string/settings_comm_label" />			
+			<item android:id="@+id/settings_audio"
+				android:title="@string/settings_audio_label" />
+			<item android:id="@+id/settings_reset_all"
+				android:title="@string/settings_reset_all_label" />				
+		</menu>		
+	</item>
+</menu>

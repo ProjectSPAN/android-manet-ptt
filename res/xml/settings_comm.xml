@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="@string/set_cast_and_port">
+		<ListPreference
+			android:key="cast_type"
+			android:title="@string/cast_type_title"
+			android:summary="@string/cast_type_summary"
+			android:entries="@array/cast_types"
+			android:entryValues="@array/cast_types_values"
+			android:defaultValue="0" />
+		<EditTextPreference 
+			android:key="port"
+			android:title="@string/port_title"
+			android:summary="@string/port_summary"
+			android:defaultValue="@string/port_default"
+			android:singleLine="true"
+			android:inputType="phone" />
+	</PreferenceCategory>	
+			
+	<PreferenceCategory android:title="@string/set_ip_addr">
+		<EditTextPreference 
+			android:key="broadcast_addr"
+			android:title="@string/broadcast_addr_title"
+			android:summary="@string/broadcast_addr_summary"
+			android:defaultValue="@string/broadcast_addr_default"
+			android:singleLine="true"
+			android:inputType="phone" />					
+		<EditTextPreference 
+			android:key="multicast_addr"
+			android:title="@string/multicast_addr_title"
+			android:summary="@string/multicast_addr_summary"
+			android:defaultValue="@string/multicast_addr_default"
+			android:singleLine="true"
+			android:inputType="phone" />		
+		<EditTextPreference 
+			android:key="unicast_addr"
+			android:title="@string/unicast_addr_title"
+			android:summary="@string/unicast_addr_summary"
+			android:defaultValue="@string/unicast_addr_default"
+			android:singleLine="true"
+			android:inputType="phone" />
+	</PreferenceCategory>
+			
+</PreferenceScreen>
