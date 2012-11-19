@@ -28,7 +28,12 @@
         <activity android:name=".settings.AudioSettings"
         		android:label="@string/settings_audio_name"
         		android:theme="@android:style/Theme.NoTitleBar.Fullscreen">        	
-        </activity>                
+        </activity>
+        
+        <activity android:name=".groups.CreateGroup"
+        		android:label="@string/groups_create_name"
+        		android:theme="@android:style/Theme.NoTitleBar.Fullscreen">        	
+        </activity>  
 </application>    
 
 </manifest> 

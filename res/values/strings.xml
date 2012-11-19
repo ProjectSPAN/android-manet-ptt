@@ -38,5 +38,8 @@
     <string name="settings_reset_all_name">Reset All</string>
     <string name="settings_reset_all_label">Reset All</string>
     <string name="setting_reset_all_confirm">All settings were restored to their default values</string>
-
+    <string name="groups_label">Groups</string>
+    <string name="groups_create_label">Create group</string>
+    <string name="groups_create_name">Create group</string>
+    <string name="groups_view_label">View groups</string>
 </resources>

@@ -17,21 +17,29 @@ public final class R {
     public static final class attr {
     }
     public static final class drawable {
-        public static final int icon=0x7f020000;
-        public static final int microphone_disabled_image=0x7f020001;
-        public static final int microphone_normal_image=0x7f020002;
-        public static final int microphone_pressed_image=0x7f020003;
-        public static final int settings_icon=0x7f020004;
+        public static final int groups_icon=0x7f020000;
+        public static final int icon=0x7f020001;
+        public static final int microphone_disabled_image=0x7f020002;
+        public static final int microphone_normal_image=0x7f020003;
+        public static final int microphone_pressed_image=0x7f020004;
+        public static final int settings_icon=0x7f020005;
     }
     public static final class id {
-        public static final int microphone_image=0x7f080000;
-        public static final int settings=0x7f080001;
-        public static final int settings_audio=0x7f080003;
-        public static final int settings_comm=0x7f080002;
-        public static final int settings_reset_all=0x7f080004;
+        public static final int TableLayout01=0x7f080002;
+        public static final int btnCancel=0x7f080001;
+        public static final int btnCommit=0x7f080000;
+        public static final int groups=0x7f080008;
+        public static final int groups_create=0x7f080009;
+        public static final int groups_view=0x7f08000a;
+        public static final int microphone_image=0x7f080003;
+        public static final int settings=0x7f080004;
+        public static final int settings_audio=0x7f080006;
+        public static final int settings_comm=0x7f080005;
+        public static final int settings_reset_all=0x7f080007;
     }
     public static final class layout {
-        public static final int main=0x7f030000;
+        public static final int creategroup=0x7f030000;
+        public static final int main=0x7f030001;
     }
     public static final class menu {
         public static final int menu=0x7f070000;
@@ -46,6 +54,10 @@ public final class R {
         public static final int echo_off=0x7f06001e;
         public static final int echo_on=0x7f06001d;
         public static final int echo_title=0x7f06001c;
+        public static final int groups_create_label=0x7f060026;
+        public static final int groups_create_name=0x7f060027;
+        public static final int groups_label=0x7f060025;
+        public static final int groups_view_label=0x7f060028;
         public static final int multicast_addr_default=0x7f060011;
         public static final int multicast_addr_summary=0x7f060010;
         public static final int multicast_addr_title=0x7f06000f;

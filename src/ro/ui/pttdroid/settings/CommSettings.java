@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import ro.ui.pttdroid.R;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;

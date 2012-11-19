@@ -12,4 +12,14 @@
 				android:title="@string/settings_reset_all_label" />				
 		</menu>		
 	</item>
+	<item android:id="@+id/groups"
+		android:icon="@drawable/groups_icon"
+		android:title="@string/groups_label">
+		<menu>
+			<item android:id="@+id/groups_create"
+				android:title="@string/groups_create_label" />			
+			<item android:id="@+id/groups_view"
+				android:title="@string/groups_view_label" />		
+		</menu>		
+	</item>
 </menu>
