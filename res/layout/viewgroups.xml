@@ -16,19 +16,8 @@
             
     </LinearLayout>
     
-    <TableLayout android:id="@+id/TableLayout01" 
-	    android:layout_width="fill_parent" 
-	    android:layout_height="fill_parent" 
-	    android:stretchColumns="*">
-		
-		<TableRow>
-		    
-			<ListView android:id="@android:id/list" 
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"/>
-			
-		</TableRow>
-		
-	</TableLayout>
+	<ListView android:id="@android:id/list" 
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"/>
 			
 </LinearLayout>

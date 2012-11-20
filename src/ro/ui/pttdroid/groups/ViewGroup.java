@@ -9,14 +9,12 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class ViewGroup extends ListActivity {
 	
 	private ListView mainListView = null;
 	
     private Button btnDelete = null;
-	private TextView tvName = null;
 	
     private GroupHelper groupHelper = null;
 	private Group group = null;
@@ -31,13 +29,12 @@ public class ViewGroup extends ListActivity {
 	    btnDelete = (Button) findViewById(R.id.btnDelete);
 	    btnDelete.setOnClickListener(new View.OnClickListener() {
 	  		public void onClick(View v) {
-	    		// TODO
+	    		groupHelper.deleteGroup(group.id);
+	    		finish();
 	  		}
 		});
 	  	
  		mainListView = getListView();
- 		
- 		tvName = (TextView) findViewById(R.id.tvName);
  		
  		int index = getIntent().getExtras().getInt(GroupHelper.GROUP_INDEX);
  		
@@ -50,7 +47,7 @@ public class ViewGroup extends ListActivity {
     }
 	
 	private void showGroup() {
- 		tvName.setText(group.name);
+		setTitle("View Group: " + group.name);
 		
  		String[] peers = new String[group.peers.size()];
  		group.peers.toArray(peers);
@@ -60,5 +57,6 @@ public class ViewGroup extends ListActivity {
 
  		mainListView.setItemsCanFocus(false);
  		mainListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
+ 		mainListView.setEnabled(false); // prevent clicking
 	}
 }

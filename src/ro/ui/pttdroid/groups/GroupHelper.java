@@ -20,7 +20,7 @@ public class GroupHelper {
 	
 	private SharedPreferences prefs = null;
 	
-	private int index = -1;
+	private int nextId = -1;
 	
 	public GroupHelper(SharedPreferences prefs) {
 		this.prefs = prefs;
@@ -47,7 +47,7 @@ public class GroupHelper {
 			id++;
 		}
 		
-		index = id; // new group index
+		nextId = id; // next group id
 	}
 	
 	public List<Group> getGroups() {
@@ -55,30 +55,41 @@ public class GroupHelper {
 		return groups;
 	}
 	
+	public Group getGroup(int index) {
+		return groupMap.get(index);
+	}
+	
 	public Group createGroup(String name, List<String> peers) {
 		String items = "";
 		for (int i = 0; i < peers.size(); i++) {
 			items += peers.get(i) + ",";
 		}
-		items = items.substring(items.length()-1);
+		items = items.substring(0, items.length()-1);
 		
-		Group group = new Group(index, name, peers);
+		Group group = new Group(nextId, name, peers);
 				
 		SharedPreferences.Editor prefEditor = prefs.edit();
 
-		prefEditor.putString(GROUP_NAME + "." + index, name);
-		prefEditor.putString(GROUP_LIST + "." + index, items);
+		prefEditor.putString(GROUP_NAME + "." + nextId, name);
+		prefEditor.putString(GROUP_LIST + "." + nextId, items);
 
 		prefEditor.commit();
 		
-		groupMap.put(index, group);
+		groupMap.put(nextId, group);
 		
-		index++; // new group index
+		nextId++; // next group id
 		
 		return group;
 	}
 	
-	public Group getGroup(int index) {
-		return groupMap.get(index);
+	public void deleteGroup(int id) {
+		SharedPreferences.Editor prefEditor = prefs.edit();
+		
+		prefEditor.remove(GROUP_NAME + "." + id);
+		prefEditor.remove(GROUP_LIST + "." + id);
+
+		prefEditor.commit();
+		
+		groupMap.remove(id);
 	}
 }

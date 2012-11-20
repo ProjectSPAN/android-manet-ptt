@@ -16,33 +16,8 @@
             
     </LinearLayout>
     
-    <TableLayout android:id="@+id/TableLayout01" 
-	    android:layout_width="fill_parent" 
-	    android:layout_height="fill_parent" 
-	    android:stretchColumns="*">
-		
-		<TableRow>
-		    
-		    <LinearLayout android:layout_width="fill_parent"
-        		android:layout_height="wrap_content"
-        		android:orientation="horizontal">
-		    
-			    <TextView android:text="Name: "
-	   				android:layout_width="wrap_content" 
-	    			android:layout_height="fill_parent"/> 
-			    
-			    <TextView android:id="@+id/tvName"
-	   				android:layout_width="wrap_content" 
-	    			android:layout_height="fill_parent"/>
-			    
-			</LinearLayout>
-		    
-			<ListView android:id="@android:id/list" 
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"/>
-			
-		</TableRow>
-		
-	</TableLayout>
+	<ListView android:id="@android:id/list" 
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"/>
 			
 </LinearLayout>

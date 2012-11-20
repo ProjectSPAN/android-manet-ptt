@@ -13,12 +13,16 @@ import android.adhoc.manet.ManetObserver;
 import android.adhoc.manet.routing.Node;
 import android.adhoc.manet.service.ManetService.AdhocStateEnum;
 import android.adhoc.manet.system.ManetConfig;
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 public class CreateGroup extends ListActivity implements ManetObserver {
@@ -31,6 +35,8 @@ public class CreateGroup extends ListActivity implements ManetObserver {
     private Button btnCancel = null;
 	
     private GroupHelper groupHelper = null;
+    
+    private List<String> peers = null;
     
 	/** Called when the activity is first created. */
 	@Override
@@ -46,7 +52,6 @@ public class CreateGroup extends ListActivity implements ManetObserver {
 	    btnCommit.setOnClickListener(new View.OnClickListener() {
 	  		public void onClick(View v) {
 	  			createGroup();
-	  			finish();
 	  		}
 		});
 	    
@@ -84,31 +89,80 @@ public class CreateGroup extends ListActivity implements ManetObserver {
 	}
 	
 	private List<String> getSelectedItems() {
-		List<String> peers = new ArrayList<String>(); // TODO: sort alphabetically
+		List<String> items = new ArrayList<String>(); // TODO: sort alphabetically
 
 		int count = mainListView.getAdapter().getCount();
 
 		for (int i = 0; i < count; i++) {
 			if (mainListView.isItemChecked(i)) {
-				peers.add((String)mainListView.getItemAtPosition(i));
+				items.add((String)mainListView.getItemAtPosition(i));
 			}
 		}
-		return peers;
+		return items;
 	}
 
 	private void createGroup() {
-		List<String> peers = getSelectedItems();
+		peers = getSelectedItems();
 		
 		if (peers.size() == 0) {
-			// show empty group dialog // TODO
+			openEmptyGroupDialog();
 			return;
 		}
-		
-		// prompt for user name // TODO
-		String name = "grouper";
-		
-		groupHelper.createGroup(name, peers);
+
+		openGroupNameDialog();
 	}
+	
+	private void openEmptyGroupDialog() {
+		new AlertDialog.Builder(this)
+        	.setTitle("Empty Group")
+        	.setMessage("Cannot create empty group. Please add at least one peer.")
+        	.setNeutralButton("Okay", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                	// nothing to do
+                }
+        	})
+        	.show();  		
+   	}
+	
+	private void openBlankNameDialog() {
+		new AlertDialog.Builder(this)
+        	.setTitle("Blank Name")
+        	.setMessage("Please specify a group name.")
+        	.setNeutralButton("Okay", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                	openGroupNameDialog(); // try again
+                }
+        	})
+        	.show();  		
+   	}
+	
+	private void openGroupNameDialog() {
+        LayoutInflater factory = LayoutInflater.from(this);
+        final View view = factory.inflate(R.layout.groupname, null);
+        final EditText etName = (EditText) view.findViewById(R.id.etName);
+		
+		new AlertDialog.Builder(this)
+        	.setTitle("Group Name")
+        	.setMessage("Please enter a name for this group.")
+        	.setView(view)
+        	.setPositiveButton("Commit", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+            		String name = etName.getText().toString();
+            		if (name.length() == 0) {
+            			openBlankNameDialog();
+            		} else {
+            			groupHelper.createGroup(name, peers);
+            			finish();
+            		}
+                }
+        	})
+        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                	// nothing to do
+                }
+        	})
+        	.show();  		
+   	}
 
 	public void onServiceConnected() {
 		manet.sendPeersQuery();
