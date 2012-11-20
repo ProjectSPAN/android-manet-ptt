@@ -38,11 +38,11 @@ public class Player extends Thread {
 			while(isRunning()) {
 								
 				try {		
-					player.stop(); // STOKER
+					// player.stop(); // STOKER
 					
 					socket.receive(packet);	// packet contains encodedFrame
 					
-					player.play(); // STOKER
+					// player.play(); // STOKER
 					
 					Log.d("Player", "Player packet length: " + packet.getLength()); // DEBUG: STOKER
 					
@@ -119,7 +119,7 @@ public class Player extends Thread {
 			
 			packet = new DatagramPacket(encodedFrame, encodedFrame.length);			
 			
-			// player.play();				
+			player.play();				
 		}
 		catch(IOException e) {
 			Log.d("Player", e.toString());

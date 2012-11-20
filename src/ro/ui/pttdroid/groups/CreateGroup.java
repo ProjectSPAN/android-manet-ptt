@@ -2,6 +2,7 @@ package ro.ui.pttdroid.groups;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -13,9 +14,8 @@ import android.adhoc.manet.routing.Node;
 import android.adhoc.manet.service.ManetService.AdhocStateEnum;
 import android.adhoc.manet.system.ManetConfig;
 import android.app.ListActivity;
-import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -26,11 +26,11 @@ public class CreateGroup extends ListActivity implements ManetObserver {
 	private ManetHelper manet = null;
 	
 	private ListView mainListView = null;
-
-	private ArrayList<String> selectedItems = new ArrayList<String>();
 	
     private Button btnCommit = null;
     private Button btnCancel = null;
+	
+    private GroupHelper groupHelper = null;
     
 	/** Called when the activity is first created. */
 	@Override
@@ -45,19 +45,22 @@ public class CreateGroup extends ListActivity implements ManetObserver {
 	    btnCommit = (Button) findViewById(R.id.btnCommit);
 	    btnCommit.setOnClickListener(new View.OnClickListener() {
 	  		public void onClick(View v) {
-	  			SaveSelections();
+	  			createGroup();
+	  			finish();
 	  		}
 		});
 	    
 	    btnCancel = (Button) findViewById(R.id.btnCancel);
 	  	btnCancel.setOnClickListener(new View.OnClickListener() {
 	  		public void onClick(View v) {
-	  			ClearSelections();
 				finish();
 	  		}
 		});
 	  	
- 		this.mainListView = getListView();
+ 		mainListView = getListView();
+ 		
+ 		SharedPreferences prefs = getSharedPreferences(GroupHelper.GROUP_PREFS, MODE_PRIVATE);
+ 		groupHelper = new GroupHelper(prefs);
     }
 	
     @Override
@@ -70,21 +73,6 @@ public class CreateGroup extends ListActivity implements ManetObserver {
     }
 	
 	@Override
-	public void onStart() {
-		super.onStart();
-	}
-	
-	@Override
-	public void onResume() {
-		super.onResume();
-	}
-	
-	@Override
-	public void onStop() {
-		super.onStop();
-	}
-	
-	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		
@@ -95,74 +83,31 @@ public class CreateGroup extends ListActivity implements ManetObserver {
         }
 	}
 	
-	private void ClearSelections() {
-		// user has clicked clear button so uncheck all the items
-		int count = this.mainListView.getAdapter().getCount();
+	private List<String> getSelectedItems() {
+		List<String> peers = new ArrayList<String>(); // TODO: sort alphabetically
+
+		int count = mainListView.getAdapter().getCount();
 
 		for (int i = 0; i < count; i++) {
-			this.mainListView.setItemChecked(i, false);
-		}
-
-		// also clear the saved selections
-		SaveSelections();
-	}
-
-	private void LoadSelections() {
-		/*
-		// if the selections were previously saved load them
-
-		SharedPreferences settingsActivity = getPreferences(MODE_PRIVATE);
-
-		if (settingsActivity.contains(SETTING_TODOLIST)) {
-			String savedItems = settingsActivity
-					.getString(SETTING_TODOLIST, "");
-
-			this.selectedItems.addAll(Arrays.asList(savedItems.split(",")));
-			int count = this.mainListView.getAdapter().getCount();
-
-			for (int i = 0; i < count; i++) {
-				String currentItem = (String) this.mainListView.getAdapter()
-						.getItem(i);
-				if (this.selectedItems.contains(currentItem)) {
-					this.mainListView.setItemChecked(i, true);
-				}
+			if (mainListView.isItemChecked(i)) {
+				peers.add((String)mainListView.getItemAtPosition(i));
 			}
 		}
-		*/
+		return peers;
 	}
 
-	private void SaveSelections() {
-		/*
-		// save the selections in the shared preference in private mode for the user
-
-		SharedPreferences settingsActivity = getPreferences(MODE_PRIVATE);
-		SharedPreferences.Editor prefEditor = settingsActivity.edit();
-
-		String savedItems = getSavedItems();
-
-		prefEditor.putString(SETTING_TODOLIST, savedItems);
-
-		prefEditor.commit();
-		*/
-	}
-
-	private String getSavedItems() {
-		String savedItems = "";
-
-		int count = this.mainListView.getAdapter().getCount();
-
-		for (int i = 0; i < count; i++) {
-
-			if (this.mainListView.isItemChecked(i)) {
-				if (savedItems.length() > 0) {
-					savedItems += "," + this.mainListView.getItemAtPosition(i);
-				} else {
-					savedItems += this.mainListView.getItemAtPosition(i);
-				}
-			}
-
+	private void createGroup() {
+		List<String> peers = getSelectedItems();
+		
+		if (peers.size() == 0) {
+			// show empty group dialog // TODO
+			return;
 		}
-		return savedItems;
+		
+		// prompt for user name // TODO
+		String name = "grouper";
+		
+		groupHelper.createGroup(name, peers);
 	}
 
 	public void onServiceConnected() {
@@ -212,6 +157,11 @@ public class CreateGroup extends ListActivity implements ManetObserver {
 			options.add(option);
 		}
 		
+		// DEBUG: TEST
+		options.add("moo");
+		options.add("bark");
+		options.add("meow");
+		
  		// Bind the data with the list
 		String[] lv_array = new String[options.size()]; 
 		options.toArray(lv_array);
@@ -221,8 +171,6 @@ public class CreateGroup extends ListActivity implements ManetObserver {
 
  		mainListView.setItemsCanFocus(false);
  		mainListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-
- 		LoadSelections();
 	}
 
 	public void onError(String error) {

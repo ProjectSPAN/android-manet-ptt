@@ -3,23 +3,17 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-    
+           
     <LinearLayout android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingTop="3dp" >
         
-        <Button android:id="@+id/btnCommit"
-            android:text="Commit"
+        <Button android:id="@+id/btnDelete"
+            android:text="Delete Group"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent" 
             android:layout_weight="1" />
             
-        <Button android:id="@+id/btnCancel"
-            android:text="Cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent" 
-            android:layout_weight="1" />
-
     </LinearLayout>
     
     <TableLayout android:id="@+id/TableLayout01" 
@@ -29,6 +23,20 @@
 		
 		<TableRow>
 		    
+		    <LinearLayout android:layout_width="fill_parent"
+        		android:layout_height="wrap_content"
+        		android:orientation="horizontal">
+		    
+			    <TextView android:text="Name: "
+	   				android:layout_width="wrap_content" 
+	    			android:layout_height="fill_parent"/> 
+			    
+			    <TextView android:id="@+id/tvName"
+	   				android:layout_width="wrap_content" 
+	    			android:layout_height="fill_parent"/>
+			    
+			</LinearLayout>
+		    
 			<ListView android:id="@android:id/list" 
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"/>
@@ -36,5 +44,5 @@
 		</TableRow>
 		
 	</TableLayout>
-    
+			
 </LinearLayout>

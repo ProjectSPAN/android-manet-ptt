@@ -13,7 +13,7 @@
         <activity android:name=".Main"
                   android:label="@string/app_name"
                   android:screenOrientation="portrait"
-                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+                  android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -21,18 +21,23 @@
         </activity>
         
         <activity android:name=".settings.CommSettings"
-        		android:label="@string/settings_comm_name"
-        		android:theme="@android:style/Theme.NoTitleBar.Fullscreen">        	
+        		android:label="@string/settings_comm_name">        	
         </activity>
 
         <activity android:name=".settings.AudioSettings"
-        		android:label="@string/settings_audio_name"
-        		android:theme="@android:style/Theme.NoTitleBar.Fullscreen">        	
+        		android:label="@string/settings_audio_name">        	
         </activity>
         
         <activity android:name=".groups.CreateGroup"
-        		android:label="@string/groups_create_name"
-        		android:theme="@android:style/Theme.NoTitleBar.Fullscreen">        	
+        		android:label="@string/group_create_name">        	
+        </activity>
+        
+        <activity android:name=".groups.ViewGroups"
+        		android:label="@string/groups_view_name">        	
+        </activity>
+        
+        <activity android:name=".groups.ViewGroup"
+        		android:label="@string/group_view_name">        	
         </activity>  
 </application>    
 

@@ -2,6 +2,7 @@ package ro.ui.pttdroid;
 
 import ro.ui.pttdroid.codecs.Speex;
 import ro.ui.pttdroid.groups.CreateGroup;
+import ro.ui.pttdroid.groups.ViewGroups;
 import ro.ui.pttdroid.settings.AudioSettings;
 import ro.ui.pttdroid.settings.CommSettings;
 import android.app.Activity;
@@ -111,12 +112,9 @@ public class Main extends Activity implements OnTouchListener {
 	    		return true;    
 	    	case R.id.settings_reset_all:
 	    		return resetAllSettings();
-	    	case R.id.groups_create:
-	    		i = new Intent(this, CreateGroup.class);
+	    	case R.id.groups:
+	    		i = new Intent(this, ViewGroups.class);
 	    		startActivityForResult(i, 0);
-	    		return true;
-	    	case R.id.groups_view:
-	    		// TODO
 	    		return true;
 	    	default:
 	    		return super.onOptionsItemSelected(item);
