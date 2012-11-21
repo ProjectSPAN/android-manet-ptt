@@ -62,10 +62,7 @@ public class ViewGroups extends ListActivity {
 	}
 	
 	private void showGroups() {
-		String[] names = new String[groups.size()];
-		for (int i = 0; i < groups.size(); i ++) {
-			names[i] = groups.get(i).name;
-		}
+		String[] names = groupHelper.getNames(groups);
 		
  		mainListView.setAdapter(new ArrayAdapter<String>(this,
  				android.R.layout.simple_list_item_1, names));

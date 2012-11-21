@@ -19,23 +19,25 @@ public final class R {
     public static final class drawable {
         public static final int groups_icon=0x7f020000;
         public static final int icon=0x7f020001;
-        public static final int microphone_disabled_image=0x7f020002;
-        public static final int microphone_normal_image=0x7f020003;
-        public static final int microphone_pressed_image=0x7f020004;
-        public static final int settings_icon=0x7f020005;
+        public static final int info_icon=0x7f020002;
+        public static final int microphone_disabled_image=0x7f020003;
+        public static final int microphone_normal_image=0x7f020004;
+        public static final int microphone_pressed_image=0x7f020005;
+        public static final int settings_icon=0x7f020006;
     }
     public static final class id {
         public static final int btnCancel=0x7f080001;
         public static final int btnCommit=0x7f080000;
-        public static final int btnCreate=0x7f080005;
-        public static final int btnDelete=0x7f080004;
+        public static final int btnCreate=0x7f080006;
+        public static final int btnDelete=0x7f080005;
         public static final int etName=0x7f080002;
-        public static final int groups=0x7f08000a;
-        public static final int microphone_image=0x7f080003;
-        public static final int settings=0x7f080006;
-        public static final int settings_audio=0x7f080008;
-        public static final int settings_comm=0x7f080007;
-        public static final int settings_reset_all=0x7f080009;
+        public static final int groups=0x7f08000b;
+        public static final int microphone_image=0x7f080004;
+        public static final int settings=0x7f080007;
+        public static final int settings_audio=0x7f080009;
+        public static final int settings_comm=0x7f080008;
+        public static final int settings_reset_all=0x7f08000a;
+        public static final int spnChannel=0x7f080003;
     }
     public static final class layout {
         public static final int creategroup=0x7f030000;
@@ -70,6 +72,7 @@ public final class R {
         public static final int port_default=0x7f06000a;
         public static final int port_summary=0x7f060009;
         public static final int port_title=0x7f060008;
+        public static final int prompt_channel=0x7f06002c;
         public static final int set_cast_and_port=0x7f060005;
         public static final int set_ip_addr=0x7f06000b;
         public static final int setting_reset_all_confirm=0x7f060024;

@@ -59,6 +59,14 @@ public class GroupHelper {
 		return groupMap.get(index);
 	}
 	
+	public String[] getNames(List<Group> groups) {
+		String[] names = new String[groups.size()];
+		for (int i = 0; i < groups.size(); i ++) {
+			names[i] = groups.get(i).name;
+		}
+		return names;
+	}
+	
 	public Group createGroup(String name, List<String> peers) {
 		String items = "";
 		for (int i = 0; i < peers.size(); i++) {

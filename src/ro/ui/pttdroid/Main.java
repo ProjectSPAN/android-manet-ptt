@@ -1,7 +1,11 @@
 package ro.ui.pttdroid;
 
+import java.util.List;
+
+import ro.ui.pttdroid.channels.Channel;
+import ro.ui.pttdroid.channels.ChannelHelper;
 import ro.ui.pttdroid.codecs.Speex;
-import ro.ui.pttdroid.groups.CreateGroup;
+import ro.ui.pttdroid.groups.GroupHelper;
 import ro.ui.pttdroid.groups.ViewGroups;
 import ro.ui.pttdroid.settings.AudioSettings;
 import ro.ui.pttdroid.settings.CommSettings;
@@ -22,10 +26,20 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 public class Main extends Activity implements OnTouchListener {
+	
+	public static final int MIC_STATE_NORMAL = 0;
+	public static final int MIC_STATE_PRESSED = 1;
+	public static final int MIC_STATE_DISABLED = 2;
+	
+	private static int microphoneState = MIC_STATE_NORMAL;
 	
 	/*
 	 * True if the activity is really starting for the first time.
@@ -33,13 +47,12 @@ public class Main extends Activity implements OnTouchListener {
 	 */
 	private static boolean isStarting = true;	
 	
-	private ImageView microphoneImage;	
+	private ImageView microphoneImage = null;
+	private Spinner spnChannel = null;
 	
-	public static final int MIC_STATE_NORMAL = 0;
-	public static final int MIC_STATE_PRESSED = 1;
-	public static final int MIC_STATE_DISABLED = 2;
-	
-	private static int microphoneState = MIC_STATE_NORMAL;
+    private GroupHelper groupHelper = null;
+	private ChannelHelper channelHelper = null;
+	private List<Channel> channels = null;
 	
 	/*
 	 * Threads for recording and playing audio data.
@@ -59,8 +72,23 @@ public class Main extends Activity implements OnTouchListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);        
-                
+        
+        setContentView(R.layout.main);
+        
+    	microphoneImage = (ImageView) findViewById(R.id.microphone_image);
+    	microphoneImage.setOnTouchListener(this);   
+    	
+    	spnChannel = (Spinner) findViewById(R.id.spnChannel);
+    	spnChannel.setOnItemSelectedListener(new OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long index) {
+				String selection = (String)spnChannel.getAdapter().getItem(position); // TODO
+			}
+
+			public void onNothingSelected(AdapterView<?> parent) {
+				// TODO Auto-generated method stub
+			}
+    	});
+	    
         init();
     }
     
@@ -68,6 +96,17 @@ public class Main extends Activity implements OnTouchListener {
     public void onStart() {
     	super.onStart();
     	
+ 		SharedPreferences prefs = getSharedPreferences(GroupHelper.GROUP_PREFS, MODE_PRIVATE);
+ 		groupHelper = new GroupHelper(prefs);
+		channelHelper = new ChannelHelper(groupHelper);
+ 		
+ 		List<Channel> channels = channelHelper.getChannels();
+		String[] names = channelHelper.getNames(channels);
+ 		
+		ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, names);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spnChannel.setAdapter(adapter);
+		
     	// Initialize codec 
     	Speex.open(AudioSettings.getSpeexQuality());
     	
@@ -182,10 +221,7 @@ public class Main extends Activity implements OnTouchListener {
     	return microphoneState;
     }
     
-    private void init() {    	    	
-    	microphoneImage = (ImageView) findViewById(R.id.microphone_image);
-    	microphoneImage.setOnTouchListener(this);    	    	    	    	    	
-    	
+    private void init() {    	
     	// When the volume keys will be pressed the audio stream volume will be changed. 
     	setVolumeControlStream(AudioManager.STREAM_MUSIC);
     	    	    	
