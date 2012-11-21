@@ -38,7 +38,11 @@
         
         <activity android:name=".groups.ViewGroup"
         		android:label="@string/group_view_name">        	
-        </activity>  
+        </activity>
+        
+        <activity android:name=".channels.ViewChannel"
+        		android:label="@string/channel_view_name">        	
+        </activity> 
 </application>    
 
 </manifest> 

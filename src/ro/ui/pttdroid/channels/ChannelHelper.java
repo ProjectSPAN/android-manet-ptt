@@ -1,7 +1,10 @@
 package ro.ui.pttdroid.channels;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+
+import android.adhoc.manet.routing.Node;
 
 import ro.ui.pttdroid.groups.Group;
 import ro.ui.pttdroid.groups.GroupHelper;
@@ -9,9 +12,14 @@ import ro.ui.pttdroid.groups.GroupHelper;
 public class ChannelHelper {
 	
 	private GroupHelper groupHelper = null;
+	private HashSet<Node> peers = null;
 	
 	public ChannelHelper(GroupHelper groupHelper) {
 		this.groupHelper = groupHelper;
+	}
+	
+	public void updatePeers(HashSet<Node> peers) {
+		this.peers = peers;
 	}
 	
 	public List<Channel> getChannels() {
@@ -24,6 +32,12 @@ public class ChannelHelper {
 		}
 		
 		// TODO: add all peer channels
+		if (peers != null) {
+			for (Node peer : peers) {
+				Channel channel = new PeerChannel(peer);
+				channels.add(channel);
+			}
+		}
 		
 		return channels;
 	}

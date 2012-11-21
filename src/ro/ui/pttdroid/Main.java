@@ -1,14 +1,21 @@
 package ro.ui.pttdroid;
 
+import java.util.HashSet;
 import java.util.List;
 
 import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.channels.ChannelHelper;
+import ro.ui.pttdroid.channels.ViewChannel;
 import ro.ui.pttdroid.codecs.Speex;
 import ro.ui.pttdroid.groups.GroupHelper;
 import ro.ui.pttdroid.groups.ViewGroups;
 import ro.ui.pttdroid.settings.AudioSettings;
 import ro.ui.pttdroid.settings.CommSettings;
+import android.adhoc.manet.ManetHelper;
+import android.adhoc.manet.ManetObserver;
+import android.adhoc.manet.routing.Node;
+import android.adhoc.manet.service.ManetService.AdhocStateEnum;
+import android.adhoc.manet.system.ManetConfig;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -29,11 +36,12 @@ import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class Main extends Activity implements OnTouchListener {
+public class Main extends Activity implements OnTouchListener, ManetObserver {
 	
 	public static final int MIC_STATE_NORMAL = 0;
 	public static final int MIC_STATE_PRESSED = 1;
@@ -49,10 +57,13 @@ public class Main extends Activity implements OnTouchListener {
 	
 	private ImageView microphoneImage = null;
 	private Spinner spnChannel = null;
+	private ImageButton btnInfo = null;
 	
     private GroupHelper groupHelper = null;
 	private ChannelHelper channelHelper = null;
 	private List<Channel> channels = null;
+	
+	private ManetHelper manet = null;
 	
 	/*
 	 * Threads for recording and playing audio data.
@@ -60,7 +71,8 @@ public class Main extends Activity implements OnTouchListener {
 	 * With other words, recorder and player threads will still be running if an screen orientation event occurs.
 	 */	
 	private static Player player;	
-	private static Recorder recorder;	
+	private static Recorder recorder;
+	
 	private static WifiManager.MulticastLock multicastLock;
 	
 	// Block recording when playing  something.
@@ -75,6 +87,9 @@ public class Main extends Activity implements OnTouchListener {
         
         setContentView(R.layout.main);
         
+		manet = new ManetHelper(this);
+	    manet.registerObserver(this);
+        
     	microphoneImage = (ImageView) findViewById(R.id.microphone_image);
     	microphoneImage.setOnTouchListener(this);   
     	
@@ -88,24 +103,46 @@ public class Main extends Activity implements OnTouchListener {
 				// TODO Auto-generated method stub
 			}
     	});
+    	
+    	/* TODO
+    	spnChannel.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				manet.sendPeersQuery(); // TODO
+				return false;
+			}
+    	});
+    	*/
+    	
+    	btnInfo = (ImageButton) findViewById(R.id.btnInfo);
+    	btnInfo.setOnClickListener(new View.OnClickListener() {
+	  		public void onClick(View v) {
+	    		Intent i = new Intent(Main.this, ViewChannel.class);
+				// i.putExtra(GroupHelper.CHANNEL_INDEX, (int)index); // TODO
+	    		startActivityForResult(i, 0);
+	  		}
+		});
+    	
+ 		SharedPreferences prefs = getSharedPreferences(GroupHelper.GROUP_PREFS, MODE_PRIVATE);
+ 		groupHelper = new GroupHelper(prefs);
+		channelHelper = new ChannelHelper(groupHelper);
 	    
         init();
     }
     
     @Override
+    public void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        
+        if (!manet.isConnectedToService()) {
+			manet.connectToService();
+        }
+    }
+    
+    @Override
     public void onStart() {
     	super.onStart();
-    	
- 		SharedPreferences prefs = getSharedPreferences(GroupHelper.GROUP_PREFS, MODE_PRIVATE);
- 		groupHelper = new GroupHelper(prefs);
-		channelHelper = new ChannelHelper(groupHelper);
- 		
- 		List<Channel> channels = channelHelper.getChannels();
-		String[] names = channelHelper.getNames(channels);
- 		
-		ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, names);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spnChannel.setAdapter(adapter);
+
+		updateChannels();
 		
     	// Initialize codec 
     	Speex.open(AudioSettings.getSpeexQuality());
@@ -126,7 +163,14 @@ public class Main extends Activity implements OnTouchListener {
             
     @Override
     public void onDestroy() {
-    	super.onDestroy();      	
+    	super.onDestroy();
+    	
+		manet.unregisterObserver(this);
+		
+        if (manet.isConnectedToService()) {
+			manet.disconnectFromService();
+        }
+    	
     	release();    	
     }
     
@@ -158,6 +202,17 @@ public class Main extends Activity implements OnTouchListener {
 	    	default:
 	    		return super.onOptionsItemSelected(item);
     	}
+    }
+    
+    private void updateChannels() {
+ 		List<Channel> channels = channelHelper.getChannels();
+		String[] names = channelHelper.getNames(channels);
+ 		
+		ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, names);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spnChannel.setAdapter(adapter);
+		
+		adapter.notifyDataSetChanged();
     }
     
     /**
@@ -298,6 +353,50 @@ public class Main extends Activity implements OnTouchListener {
     		// Resetting isStarting.
     		isStarting = true;     		
     	}
-    }     
-        
+    }
+    
+
+	public void onServiceConnected() {
+		manet.sendPeersQuery();
+	}
+
+	public void onServiceDisconnected() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onServiceStarted() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onServiceStopped() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onAdhocStateUpdated(AdhocStateEnum state, String info) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onConfigUpdated(ManetConfig manetcfg) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void onRoutingInfoUpdated(String info) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onPeersUpdated(HashSet<Node> peers) {
+		channelHelper.updatePeers(peers);
+		updateChannels();
+	}
+
+	public void onError(String error) {
+		// TODO Auto-generated method stub
+		
+	}
 }
