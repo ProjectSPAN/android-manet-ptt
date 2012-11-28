@@ -116,7 +116,8 @@ public class Main extends Activity implements ManetObserver {
     	spnChannel = (Spinner) findViewById(R.id.spnChannel);
     	spnChannel.setOnItemSelectedListener(new OnItemSelectedListener() {
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long index) {
-				String selection = (String)spnChannel.getAdapter().getItem(position); // TODO
+				Channel selection = (Channel) spnChannel.getAdapter().getItem(position);
+				channel = selection; // TODO
 			}
 
 			public void onNothingSelected(AdapterView<?> parent) {
@@ -127,7 +128,9 @@ public class Main extends Activity implements ManetObserver {
     	spnChannel.setOnTouchListener(new OnTouchListener() {
     		public boolean onTouch(View view, MotionEvent event) {	
 	    		switch(event.getAction()) {
-		    		case MotionEvent.ACTION_DOWN:    			
+		    		case MotionEvent.ACTION_DOWN:
+		    			// update spinner contents here so as not to confuse the user
+		    			// by removing the current channel from the list mid-use
 		    			updateChannelList();
 		    			break;
 	    		}
@@ -227,17 +230,25 @@ public class Main extends Activity implements ManetObserver {
     }
     
     private void updateChannelList() {
- 		List<Channel> channels = channelHelper.getChannels();
-		String[] names = channelHelper.getNames(channels);
+ 		channels = channelHelper.getChannels();
  		
-		ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, names);
+		ArrayAdapter<Channel> adapter = 
+				new ArrayAdapter<Channel>(this, android.R.layout.simple_spinner_item, channels);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spnChannel.setAdapter(adapter);
 		
-		
-		// spnChannel.setSelection(position); // TODO
-		
 		adapter.notifyDataSetChanged();
+		
+		// maintain channel selection
+		int index = -1; 
+		if (channel != null) {
+			index = adapter.getPosition(channel);
+		}
+		if (index < 0) {
+			spnChannel.setSelection(0); // blank channel
+		} else {
+			spnChannel.setSelection(index);
+		}
     }
     
     /**
@@ -329,18 +340,6 @@ public class Main extends Activity implements ManetObserver {
 			
     		handler.removeCallbacks(stateRunnable);
     		handler.postDelayed(stateRunnable, STATE_CHECK_PERIOD_MILLISEC);
-			
-			// Update channel list
-    		channelRunnable = new Runnable() {
-				
-				public void run() {					
-					manet.sendPeersQuery();
-					handler.postDelayed(this, CHANNEL_CHECK_PERIOD_MILLISEC);
-				}
-			};
-    		
-    		handler.removeCallbacks(channelRunnable);
-    		handler.postDelayed(channelRunnable, STATE_CHECK_PERIOD_MILLISEC);
     		
     		player.start();
     		recorder.start(); 
@@ -379,7 +378,17 @@ public class Main extends Activity implements ManetObserver {
     
 
 	public void onServiceConnected() {
-		manet.sendPeersQuery();
+		// Update channel list
+		channelRunnable = new Runnable() {
+			
+			public void run() {					
+				manet.sendPeersQuery();
+				handler.postDelayed(this, CHANNEL_CHECK_PERIOD_MILLISEC);
+			}
+		};
+		
+		handler.removeCallbacks(channelRunnable);
+		handler.postDelayed(channelRunnable, STATE_CHECK_PERIOD_MILLISEC);
 	}
 
 	public void onServiceDisconnected() {
@@ -408,7 +417,6 @@ public class Main extends Activity implements ManetObserver {
 
 	public void onPeersUpdated(HashSet<Node> peers) {
 		channelHelper.updatePeers(peers);
-		// updateChannelList();
 	}
 
 	public void onError(String error) {

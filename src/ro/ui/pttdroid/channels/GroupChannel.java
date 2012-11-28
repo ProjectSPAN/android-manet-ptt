@@ -10,4 +10,15 @@ public class GroupChannel extends Channel {
 		super(group.name);
 		this.group = group;
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof GroupChannel) {
+			GroupChannel channel = (GroupChannel) other;
+			if (channel.group.id == group.id) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
