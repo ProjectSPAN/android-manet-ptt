@@ -41,7 +41,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class Main extends Activity implements OnTouchListener, ManetObserver {
+public class Main extends Activity implements ManetObserver {
 	
 	public static final int MIC_STATE_NORMAL = 0;
 	public static final int MIC_STATE_PRESSED = 1;
@@ -62,6 +62,7 @@ public class Main extends Activity implements OnTouchListener, ManetObserver {
     private GroupHelper groupHelper = null;
 	private ChannelHelper channelHelper = null;
 	private List<Channel> channels = null;
+	private Channel channel = null;
 	
 	private ManetHelper manet = null;
 	
@@ -77,9 +78,12 @@ public class Main extends Activity implements OnTouchListener, ManetObserver {
 	
 	// Block recording when playing  something.
 	private static Handler handler = new Handler();
-	private static Runnable runnable;
+	private static Runnable stateRunnable;
 	private static int storedProgress = 0;	
-	private static final int PROGRESS_CHECK_PERIOD = 100;
+	private static final int STATE_CHECK_PERIOD_MILLISEC = 100;
+	
+	private static Runnable channelRunnable;
+	private static final int CHANNEL_CHECK_PERIOD_MILLISEC = 5000;
 		
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,7 +95,23 @@ public class Main extends Activity implements OnTouchListener, ManetObserver {
 	    manet.registerObserver(this);
         
     	microphoneImage = (ImageView) findViewById(R.id.microphone_image);
-    	microphoneImage.setOnTouchListener(this);   
+    	microphoneImage.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View view, MotionEvent event) {
+				if(getMicrophoneState()!=MIC_STATE_DISABLED) {    		
+		    		switch(event.getAction()) {
+			    		case MotionEvent.ACTION_DOWN:    			
+			    			recorder.resumeAudio();
+			    			setMicrophoneState(MIC_STATE_PRESSED);
+			    			break;
+			    		case MotionEvent.ACTION_UP:
+			    			setMicrophoneState(MIC_STATE_NORMAL);
+			    			recorder.pauseAudio();    			
+			    			break;
+		    		}
+		    	}
+		    	return true;
+			}
+    	});
     	
     	spnChannel = (Spinner) findViewById(R.id.spnChannel);
     	spnChannel.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -104,14 +124,16 @@ public class Main extends Activity implements OnTouchListener, ManetObserver {
 			}
     	});
     	
-    	/* TODO
     	spnChannel.setOnTouchListener(new OnTouchListener() {
-			public boolean onTouch(View v, MotionEvent event) {
-				manet.sendPeersQuery(); // TODO
-				return false;
+    		public boolean onTouch(View view, MotionEvent event) {	
+	    		switch(event.getAction()) {
+		    		case MotionEvent.ACTION_DOWN:    			
+		    			updateChannelList();
+		    			break;
+	    		}
+		    	return false; // don't consume event so that spinner behaves normally 
 			}
     	});
-    	*/
     	
     	btnInfo = (ImageButton) findViewById(R.id.btnInfo);
     	btnInfo.setOnClickListener(new View.OnClickListener() {
@@ -142,7 +164,7 @@ public class Main extends Activity implements OnTouchListener, ManetObserver {
     public void onStart() {
     	super.onStart();
 
-		updateChannels();
+		updateChannelList();
 		
     	// Initialize codec 
     	Speex.open(AudioSettings.getSpeexQuality());
@@ -204,13 +226,16 @@ public class Main extends Activity implements OnTouchListener, ManetObserver {
     	}
     }
     
-    private void updateChannels() {
+    private void updateChannelList() {
  		List<Channel> channels = channelHelper.getChannels();
 		String[] names = channelHelper.getNames(channels);
  		
 		ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, names);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spnChannel.setAdapter(adapter);
+		
+		
+		// spnChannel.setSelection(position); // TODO
 		
 		adapter.notifyDataSetChanged();
     }
@@ -237,22 +262,6 @@ public class Main extends Activity implements OnTouchListener, ManetObserver {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
     	CommSettings.getSettings(this);     	    	
     	AudioSettings.getSettings(this);    	
-    }
-    
-    public boolean onTouch(View v, MotionEvent e) {
-    	if(getMicrophoneState()!=MIC_STATE_DISABLED) {    		
-    		switch(e.getAction()) {
-    		case MotionEvent.ACTION_DOWN:    			
-    			recorder.resumeAudio();
-    			setMicrophoneState(MIC_STATE_PRESSED);
-    			break;
-    		case MotionEvent.ACTION_UP:
-    			setMicrophoneState(MIC_STATE_NORMAL);
-    			recorder.pauseAudio();    			
-    			break;
-    		}
-    	}
-    	return true;
     }
     
     public synchronized void setMicrophoneState(int state) {
@@ -297,7 +306,7 @@ public class Main extends Activity implements OnTouchListener, ManetObserver {
     		recorder = new Recorder();
     		
     		// Disable microphone when receiving data.
-    		runnable = new Runnable() {
+    		stateRunnable = new Runnable() {
 				
 				public void run() {					
 					int currentProgress = player.getProgress();
@@ -314,12 +323,24 @@ public class Main extends Activity implements OnTouchListener, ManetObserver {
 					}
 					
 					storedProgress = currentProgress;
-					handler.postDelayed(this, PROGRESS_CHECK_PERIOD);
+					handler.postDelayed(this, STATE_CHECK_PERIOD_MILLISEC);
+				}
+			};
+			
+    		handler.removeCallbacks(stateRunnable);
+    		handler.postDelayed(stateRunnable, STATE_CHECK_PERIOD_MILLISEC);
+			
+			// Update channel list
+    		channelRunnable = new Runnable() {
+				
+				public void run() {					
+					manet.sendPeersQuery();
+					handler.postDelayed(this, CHANNEL_CHECK_PERIOD_MILLISEC);
 				}
 			};
     		
-    		handler.removeCallbacks(runnable);
-    		handler.postDelayed(runnable, PROGRESS_CHECK_PERIOD);
+    		handler.removeCallbacks(channelRunnable);
+    		handler.postDelayed(channelRunnable, STATE_CHECK_PERIOD_MILLISEC);
     		
     		player.start();
     		recorder.start(); 
@@ -334,7 +355,8 @@ public class Main extends Activity implements OnTouchListener, ManetObserver {
         	// STOKER
         	multicastLock.release();
     		
-    		handler.removeCallbacks(runnable);
+    		handler.removeCallbacks(stateRunnable);
+    		handler.removeCallbacks(channelRunnable);
 
     		// Force threads to finish.
     		player.finish();    		    		
@@ -362,41 +384,34 @@ public class Main extends Activity implements OnTouchListener, ManetObserver {
 
 	public void onServiceDisconnected() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public void onServiceStarted() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public void onServiceStopped() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public void onAdhocStateUpdated(AdhocStateEnum state, String info) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public void onConfigUpdated(ManetConfig manetcfg) {
 		// TODO Auto-generated method stub
-		
 	}
 	
 	public void onRoutingInfoUpdated(String info) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public void onPeersUpdated(HashSet<Node> peers) {
 		channelHelper.updatePeers(peers);
-		updateChannels();
+		// updateChannelList();
 	}
 
 	public void onError(String error) {
 		// TODO Auto-generated method stub
-		
 	}
 }

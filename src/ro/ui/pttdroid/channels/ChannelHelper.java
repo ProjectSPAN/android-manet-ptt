@@ -11,6 +11,8 @@ import ro.ui.pttdroid.groups.GroupHelper;
 
 public class ChannelHelper {
 	
+	public static String CHANNEL_NONE = "None";
+	
 	private GroupHelper groupHelper = null;
 	private HashSet<Node> peers = null;
 	
@@ -31,7 +33,6 @@ public class ChannelHelper {
 			channels.add(channel);
 		}
 		
-		// TODO: add all peer channels
 		if (peers != null) {
 			for (Node peer : peers) {
 				Channel channel = new PeerChannel(peer);
@@ -43,9 +44,10 @@ public class ChannelHelper {
 	}
 	
 	public String[] getNames(List<Channel> channels) {
-		String[] names = new String[channels.size()];
+		String[] names = new String[channels.size()+1];
+		names[0] = CHANNEL_NONE;
 		for (int i = 0; i < channels.size(); i ++) {
-			names[i] = channels.get(i).name;
+			names[i+1] = channels.get(i).name;
 		}
 		return names;
 	}
