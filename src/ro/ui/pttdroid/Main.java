@@ -9,6 +9,7 @@ import ro.ui.pttdroid.channels.ViewChannel;
 import ro.ui.pttdroid.codecs.Speex;
 import ro.ui.pttdroid.groups.GroupHelper;
 import ro.ui.pttdroid.groups.ViewGroups;
+import ro.ui.pttdroid.service.ConnectionService;
 import ro.ui.pttdroid.settings.AudioSettings;
 import ro.ui.pttdroid.settings.CommSettings;
 import android.adhoc.manet.ManetHelper;
@@ -151,6 +152,9 @@ public class Main extends Activity implements ManetObserver {
  		groupHelper = new GroupHelper(prefs);
 		channelHelper = new ChannelHelper(groupHelper);
 	    
+   		// start service so that it runs even if no active activities are bound to it
+   		startService(new Intent(this, ConnectionService.class));
+		
         init();
     }
     
