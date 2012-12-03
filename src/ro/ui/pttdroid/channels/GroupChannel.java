@@ -29,7 +29,12 @@ public class GroupChannel extends Channel {
 	}
 
 	@Override
-	public boolean usesMic() {
+	public boolean isRecorderEnabled() {
+		return true;
+	}
+
+	@Override
+	public boolean isPlayerEnabled() {
 		return true;
 	}
 }

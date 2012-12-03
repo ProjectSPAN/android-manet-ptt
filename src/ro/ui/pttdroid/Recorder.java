@@ -45,6 +45,10 @@ public class Recorder extends Thread {
 	}
 	
 	public void run() {
+		if (!channel.isRecorderEnabled()) {
+			return;
+		}
+		
 		// Set audio specific thread priority
 		android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 		

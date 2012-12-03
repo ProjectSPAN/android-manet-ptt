@@ -341,7 +341,7 @@ public class Main extends Activity implements ManetObserver {
     		recorder = new Recorder(channel);
     		
     		// initial mic state
-    		if (channel.usesMic()) {
+    		if (channel.isRecorderEnabled()) {
     			setMicrophoneState(MIC_STATE_NORMAL);
     		} else {
     			setMicrophoneState(MIC_STATE_DISABLED);
@@ -361,7 +361,7 @@ public class Main extends Activity implements ManetObserver {
 					}
 					else {
 						if(getMicrophoneState() == MIC_STATE_INUSE) {
-							if(channel.usesMic()) {
+							if(channel.isRecorderEnabled()) {
 								setMicrophoneState(MIC_STATE_NORMAL);
 							} else {
 								setMicrophoneState(MIC_STATE_DISABLED);

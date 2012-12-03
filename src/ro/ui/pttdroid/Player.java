@@ -38,6 +38,10 @@ public class Player extends Thread {
 	}
 				
 	public void run() {
+		if (!channel.isPlayerEnabled()) {
+			return;
+		}
+			
 		android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);				 
 		
 		while(!isFinishing()) {			
@@ -166,7 +170,9 @@ public class Player extends Thread {
 	public synchronized void pauseAudio() {
 		isRunning = false;
 		leaveGroup();
-		socket.close();
+		if (socket != null) {
+			socket.close();
+		}
 	}
 		
 	public synchronized boolean isFinishing() {

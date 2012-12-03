@@ -32,7 +32,9 @@ public abstract class Channel {
 	
 	public abstract int getCastType();
 	
-	public abstract boolean usesMic();
+	public abstract boolean isRecorderEnabled();
+	
+	public abstract boolean isPlayerEnabled();
 	
 	public void getSettings(Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

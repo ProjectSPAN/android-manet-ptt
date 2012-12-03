@@ -20,7 +20,12 @@ public class ListenOnlyChannel extends Channel {
 	}
 
 	@Override
-	public boolean usesMic() {
+	public boolean isRecorderEnabled() {
 		return false;
+	}
+
+	@Override
+	public boolean isPlayerEnabled() {
+		return true;
 	}
 }
