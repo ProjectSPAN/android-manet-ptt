@@ -18,6 +18,8 @@ public abstract class Channel {
 	public int port = 2010; // TODO: DEFAULT
 	public InetAddress addr = null;
 	
+	public boolean valid = true;
+	
 	public Channel(String name) {
 		this.name = name;
 	}
@@ -35,6 +37,10 @@ public abstract class Channel {
 	public abstract boolean isRecorderEnabled();
 	
 	public abstract boolean isPlayerEnabled();
+	
+	public void setValid(boolean valid) {
+		this.valid = valid;
+	}
 	
 	public void getSettings(Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

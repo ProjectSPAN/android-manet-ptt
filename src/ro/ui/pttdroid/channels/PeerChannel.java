@@ -27,6 +27,11 @@ public class PeerChannel extends Channel {
 		this.peer = peer;
 	}
 	
+	public PeerChannel(String name, InetAddress addr) { // TODO
+		super(name);
+		this.addr = addr;
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof PeerChannel) {

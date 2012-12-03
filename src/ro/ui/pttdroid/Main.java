@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -39,6 +40,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class Main extends Activity implements ManetObserver {
@@ -61,7 +63,7 @@ public class Main extends Activity implements ManetObserver {
 	private ImageButton btnInfo = null;
 	
 	private List<Channel> channels = null;
-	private Channel channel = ChannelHelper.getDefaultChannel();
+	private Channel channel = null;
 	
 	private ManetHelper manet = null;
 	
@@ -94,8 +96,14 @@ public class Main extends Activity implements ManetObserver {
     	spnChannel.setOnItemSelectedListener(new OnItemSelectedListener() {
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long index) {
 				Channel selection = (Channel) spnChannel.getAdapter().getItem(position);
+				/* TODO
+				if (!selection.valid) {
+					((TextView) parent.getChildAt(0)).setTextColor(Color.RED);
+				}
+				*/
 				if (!selection.equals(channel)) {
 					channel = selection;
+					ChannelHelper.setChannel(channel);
 					pttReset();
 				}
 			}
@@ -131,11 +139,11 @@ public class Main extends Activity implements ManetObserver {
     	microphoneImage.setOnTouchListener(new OnTouchListener() {
 			public boolean onTouch(View view, MotionEvent event) {
 				boolean canTalk = false;
-				if (AudioSettings.getTalkOverState()) {
-					canTalk = true;
-				} else if ((getMicrophoneState() != MIC_STATE_DISABLED) &&
-					(getMicrophoneState() != MIC_STATE_PLAYBACK)) {    	
-					canTalk = true;
+				if (getMicrophoneState() != MIC_STATE_DISABLED) {
+					if (AudioSettings.getTalkOverState() || 
+							(getMicrophoneState() != MIC_STATE_PLAYBACK)) { 	
+						canTalk = true;
+					}
 				}
 				if (canTalk) {
 		    		switch(event.getAction()) {
@@ -155,6 +163,8 @@ public class Main extends Activity implements ManetObserver {
     	
     	GroupHelper.getSettings(this); 
     	ChannelHelper.getSettings(this);
+    	
+    	channel = ChannelHelper.getChannel(); // TODO
     	
 		manet = new ManetHelper(this);
 	    manet.registerObserver(this);
@@ -241,6 +251,11 @@ public class Main extends Activity implements ManetObserver {
     private void updateChannelList() {
  		channels = ChannelHelper.getChannels();
  		
+ 		if (!channels.contains(channel)) {
+ 			channels.add(channel); // add invalid channel back in for user awareness
+ 			channel.setValid(false);
+ 		}
+ 		
 		ArrayAdapter<Channel> adapter = 
 				new ArrayAdapter<Channel>(this, android.R.layout.simple_spinner_item, channels);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -253,6 +268,7 @@ public class Main extends Activity implements ManetObserver {
 			channel = ChannelHelper.getDefaultChannel();
 		}
 		int index = adapter.getPosition(channel);
+		
 		spnChannel.setSelection(index);
     }
     
@@ -321,7 +337,7 @@ public class Main extends Activity implements ManetObserver {
     }
     
     private void pttPause() {
-    	player.pauseAudio();
+    	// player.pauseAudio(); // TODO
     	recorder.pauseAudio();    	
     	
     	// Release codec resources
