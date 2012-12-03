@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.MulticastSocket;
+import java.net.SocketException;
 
 import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.codecs.Speex;
@@ -67,6 +68,10 @@ public class Player extends Thread {
 										
 					// Make some progress
 					makeProgress();
+				}
+				catch(SocketException e) {
+					// this may be expected 
+					Log.w("PTT", e.getMessage());
 				}
 				catch(IOException e) {
 					e.printStackTrace();

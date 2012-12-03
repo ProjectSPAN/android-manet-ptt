@@ -1,5 +1,7 @@
 package ro.ui.pttdroid.groups;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +29,7 @@ import android.widget.ListView;
 public class CreateGroup extends ListActivity implements ManetObserver {
 	
 	private ManetHelper manet = null;
+	private ManetConfig manetcfg = null;
 	
 	private ListView mainListView = null;
 	
@@ -34,6 +37,7 @@ public class CreateGroup extends ListActivity implements ManetObserver {
     private Button btnCancel = null;
     
     private List<String> peers = null;
+    private InetAddress addr = null;
     
 	/** Called when the activity is first created. */
 	@Override
@@ -145,7 +149,7 @@ public class CreateGroup extends ListActivity implements ManetObserver {
             		if (name.length() == 0) {
             			openBlankNameDialog();
             		} else {
-            			GroupHelper.createGroup(name, peers);
+            			GroupHelper.createGroup(name, peers, addr);
             			finish();
             		}
                 }
@@ -160,40 +164,40 @@ public class CreateGroup extends ListActivity implements ManetObserver {
 
 	public void onServiceConnected() {
 		manet.sendPeersQuery();
+		manet.sendManetConfigQuery();
 	}
 
 	public void onServiceDisconnected() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public void onServiceStarted() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public void onServiceStopped() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public void onAdhocStateUpdated(AdhocStateEnum state, String info) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public void onConfigUpdated(ManetConfig manetcfg) {
-		// TODO Auto-generated method stub
+		this.manetcfg = manetcfg;
 		
+		try {
+			addr = InetAddress.getByName(manetcfg.getIpBroadcast()); // TODO
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void onRoutingInfoUpdated(String info) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public void onPeersUpdated(HashSet<Node> peers) {
-		
 		Set<String> options = new TreeSet<String>();
 		String option = null;
 		for (Node peer : peers) {
@@ -223,6 +227,5 @@ public class CreateGroup extends ListActivity implements ManetObserver {
 
 	public void onError(String error) {
 		// TODO Auto-generated method stub
-		
 	}
 }

@@ -21,7 +21,6 @@ public class PeerChannel extends Channel {
 		try {
 			addr = InetAddress.getByName(peer.addr);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

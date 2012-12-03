@@ -9,6 +9,7 @@ public class GroupChannel extends Channel {
 	public GroupChannel (Group group) {
 		super(group.name);
 		this.group = group;
+		addr = group.addr;
 	}
 	
 	@Override
@@ -24,6 +25,6 @@ public class GroupChannel extends Channel {
 
 	@Override
 	public int getCastType() {
-		return Channel.MULTICAST; // TODO
+		return Channel.BROADCAST; // TODO
 	}
 }

@@ -1,5 +1,7 @@
 package ro.ui.pttdroid.groups;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,6 +19,7 @@ public class GroupHelper {
 	
 	public static final String GROUP_NAME  = "group_name";
 	public static final String GROUP_LIST  = "group_list";
+	public static final String GROUP_ADDR  = "group_addr";
 	
 	private static Map<Integer, Group> groupMap = null;
 	
@@ -37,12 +40,18 @@ public class GroupHelper {
 			if (prefs.contains(GROUP_NAME + "." + id)) {
 				String name = prefs.getString(GROUP_NAME + "." + id, "");
 				String list = prefs.getString(GROUP_LIST + "." + id, "");
+				String addr = prefs.getString(GROUP_ADDR + "." + id, "");
 	
 				ArrayList<String> peers = new ArrayList<String>();
 				peers.addAll(Arrays.asList(list.split(",")));
 				
-				Group group = new Group(id, name, peers);
-				groupMap.put(id, group);
+				try {
+					InetAddress inetAddr = InetAddress.getByName(addr);
+					Group group = new Group(id, name, peers, inetAddr);
+					groupMap.put(id, group);
+				} catch (UnknownHostException e) {
+					e.printStackTrace();
+				}
 			} else {
 				break; // stop search
 			}
@@ -69,19 +78,20 @@ public class GroupHelper {
 		return names;
 	}
 	
-	public static Group createGroup(String name, List<String> peers) {
+	public static Group createGroup(String name, List<String> peers, InetAddress addr) {
 		String items = "";
 		for (int i = 0; i < peers.size(); i++) {
 			items += peers.get(i) + ",";
 		}
 		items = items.substring(0, items.length()-1);
 		
-		Group group = new Group(nextId, name, peers);
+		Group group = new Group(nextId, name, peers, addr);
 				
 		SharedPreferences.Editor prefEditor = prefs.edit();
 
 		prefEditor.putString(GROUP_NAME + "." + nextId, name);
 		prefEditor.putString(GROUP_LIST + "." + nextId, items);
+		prefEditor.putString(GROUP_ADDR + "." + nextId, addr.getHostAddress());
 
 		prefEditor.commit();
 		
@@ -97,6 +107,7 @@ public class GroupHelper {
 		
 		prefEditor.remove(GROUP_NAME + "." + id);
 		prefEditor.remove(GROUP_LIST + "." + id);
+		prefEditor.remove(GROUP_ADDR + "." + id);
 
 		prefEditor.commit();
 		
