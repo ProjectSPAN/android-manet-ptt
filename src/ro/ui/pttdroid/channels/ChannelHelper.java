@@ -15,7 +15,7 @@ import ro.ui.pttdroid.groups.GroupHelper;
 
 public class ChannelHelper {
 	
-	public static String CHANNEL_NONE = "None";
+	public static String CHANNEL_NONE = "Listen Only";
 	
 	private static GroupHelper groupHelper = null;
 	private static HashSet<Node> peers = null;

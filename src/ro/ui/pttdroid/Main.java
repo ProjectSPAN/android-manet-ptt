@@ -274,7 +274,7 @@ public class Main extends Activity implements ManetObserver {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
     	// CommSettings.getSettings(this);     	    	
-    	// AudioSettings.getSettings(this);    	
+    	AudioSettings.getSettings(this);    	
     }
     
     public synchronized void setMicrophoneState(int state) {
@@ -333,10 +333,7 @@ public class Main extends Activity implements ManetObserver {
         	multicastLock = wm.createMulticastLock("PTT");
         	multicastLock.acquire();
     		
-        	// TODO
-    		// CommSettings.getSettings(this);
-    		// AudioSettings.getSettings(this);
-    		// channel.getSettings(this);    	
+    		AudioSettings.getSettings(this); // TODO  	
         	
     		player = new Player(channel);    		    		     		    	
     		recorder = new Recorder(channel);
