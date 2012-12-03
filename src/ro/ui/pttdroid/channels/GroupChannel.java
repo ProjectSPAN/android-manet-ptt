@@ -27,4 +27,9 @@ public class GroupChannel extends Channel {
 	public int getCastType() {
 		return Channel.BROADCAST; // TODO
 	}
+
+	@Override
+	public boolean usesMic() {
+		return true;
+	}
 }

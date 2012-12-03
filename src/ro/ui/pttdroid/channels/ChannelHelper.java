@@ -15,27 +15,38 @@ import ro.ui.pttdroid.groups.GroupHelper;
 
 public class ChannelHelper {
 	
-	public static String CHANNEL_NONE = "Listen Only";
+	public static String CHANNEL_NULL = "Silence";
+	public static String CHANNEL_LISTEN_ONLY = "Listen Only";
 	
 	private static GroupHelper groupHelper = null;
 	private static HashSet<Node> peers = null;
 	
-	private static Channel blankChannel = new BlankChannel();
+	private static Channel nullChannel = new NullChannel();
+	private static Channel listenOnlyChannel = new ListenOnlyChannel();
 	
 	public static void updatePeers(HashSet<Node> _peers) {
 		peers = _peers;
 	}
+
+	public static Channel getDefaultChannel() {
+		return listenOnlyChannel;
+	}
 	
-	public static Channel getBlankChannel() {
-		return blankChannel;
+	public static Channel getNullChannel() {
+		return nullChannel;
+	}
+	
+	public static Channel getListenOnlyChannel() {
+		return listenOnlyChannel;
 	}
 	
 	public static List<Channel> getChannels() {
 		List<Channel> channels = new ArrayList<Channel>(); // TODO: sort alphabetically, groups before individuals
 		Channel channel = null;
 		
-		// blank channel
-		channels.add(blankChannel);
+		// special channels
+		channels.add(nullChannel);
+		channels.add(listenOnlyChannel);
 		
 		// groups
 		List<Group> groups = GroupHelper.getGroups();

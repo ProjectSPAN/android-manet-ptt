@@ -3,7 +3,6 @@ package ro.ui.pttdroid;
 import java.util.HashSet;
 import java.util.List;
 
-import ro.ui.pttdroid.channels.BlankChannel;
 import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.channels.ChannelHelper;
 import ro.ui.pttdroid.channels.ViewChannel;
@@ -62,7 +61,7 @@ public class Main extends Activity implements ManetObserver {
 	private ImageButton btnInfo = null;
 	
 	private List<Channel> channels = null;
-	private Channel channel = ChannelHelper.getBlankChannel();
+	private Channel channel = ChannelHelper.getDefaultChannel();
 	
 	private ManetHelper manet = null;
 	
@@ -244,15 +243,11 @@ public class Main extends Activity implements ManetObserver {
 		adapter.notifyDataSetChanged();
 		
 		// maintain channel selection
-		int index = -1; 
-		if (channel != null) {
-			index = adapter.getPosition(channel);
+		if (channel == null) {
+			channel = ChannelHelper.getDefaultChannel();
 		}
-		if (index < 0) {
-			spnChannel.setSelection(0); // blank channel
-		} else {
-			spnChannel.setSelection(index);
-		}
+		int index = adapter.getPosition(channel);
+		spnChannel.setSelection(index);
     }
     
     /**
@@ -346,10 +341,10 @@ public class Main extends Activity implements ManetObserver {
     		recorder = new Recorder(channel);
     		
     		// initial mic state
-    		if (channel instanceof BlankChannel) {
-    			setMicrophoneState(MIC_STATE_DISABLED);
-    		} else {
+    		if (channel.usesMic()) {
     			setMicrophoneState(MIC_STATE_NORMAL);
+    		} else {
+    			setMicrophoneState(MIC_STATE_DISABLED);
     		}
     		
     		// Disable microphone when receiving data.
@@ -366,10 +361,10 @@ public class Main extends Activity implements ManetObserver {
 					}
 					else {
 						if(getMicrophoneState() == MIC_STATE_INUSE) {
-							if(channel instanceof BlankChannel) {
-								setMicrophoneState(MIC_STATE_DISABLED);
-							} else {
+							if(channel.usesMic()) {
 								setMicrophoneState(MIC_STATE_NORMAL);
+							} else {
+								setMicrophoneState(MIC_STATE_DISABLED);
 							}
 						}
 					}

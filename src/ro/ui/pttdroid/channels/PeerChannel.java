@@ -42,4 +42,9 @@ public class PeerChannel extends Channel {
 	public int getCastType() {
 		return Channel.UNICAST;
 	}
+
+	@Override
+	public boolean usesMic() {
+		return true;
+	}
 }

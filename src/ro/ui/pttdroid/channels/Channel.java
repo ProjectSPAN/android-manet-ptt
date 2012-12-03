@@ -32,6 +32,8 @@ public abstract class Channel {
 	
 	public abstract int getCastType();
 	
+	public abstract boolean usesMic();
+	
 	public void getSettings(Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		Resources res = context.getResources();

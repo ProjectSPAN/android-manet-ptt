@@ -63,7 +63,7 @@ public class Recorder extends Thread {
 					}
 																		
 					// Send encoded frame packed within an UDP datagram
-					if (packet.getAddress() != null) { // TODO: blank channel
+					if (packet.getAddress() != null) { // TODO: special channel
 						socket.send(packet);
 					}
 				}
