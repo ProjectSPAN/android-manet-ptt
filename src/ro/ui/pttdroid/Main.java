@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -40,7 +39,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class Main extends Activity implements ManetObserver {
@@ -96,14 +94,10 @@ public class Main extends Activity implements ManetObserver {
     	spnChannel.setOnItemSelectedListener(new OnItemSelectedListener() {
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long index) {
 				Channel selection = (Channel) spnChannel.getAdapter().getItem(position);
-				/* TODO
-				if (!selection.valid) {
-					((TextView) parent.getChildAt(0)).setTextColor(Color.RED);
-				}
-				*/
 				if (!selection.equals(channel)) {
 					channel = selection;
 					ChannelHelper.setChannel(channel);
+					checkChannels();
 					pttReset();
 				}
 			}
@@ -248,13 +242,20 @@ public class Main extends Activity implements ManetObserver {
     	}
     }
     
-    private void updateChannelList() {
+    private void checkChannels() {
  		channels = ChannelHelper.getChannels();
  		
  		if (!channels.contains(channel)) {
  			channels.add(channel); // add invalid channel back in for user awareness
  			channel.setValid(false);
+			btnInfo.setImageResource(R.drawable.red_orb_icon);
+ 		} else {
+ 			btnInfo.setImageResource(R.drawable.green_orb_icon); // TODO: orange?
  		}
+    }
+    
+    private void updateChannelList() {
+    	checkChannels();
  		
 		ArrayAdapter<Channel> adapter = 
 				new ArrayAdapter<Channel>(this, android.R.layout.simple_spinner_item, channels);
@@ -268,7 +269,6 @@ public class Main extends Activity implements ManetObserver {
 			channel = ChannelHelper.getDefaultChannel();
 		}
 		int index = adapter.getPosition(channel);
-		
 		spnChannel.setSelection(index);
     }
     
@@ -478,6 +478,7 @@ public class Main extends Activity implements ManetObserver {
 
 	public void onPeersUpdated(HashSet<Node> peers) {
 		ChannelHelper.updatePeers(peers);
+		checkChannels();
 	}
 
 	public void onError(String error) {
