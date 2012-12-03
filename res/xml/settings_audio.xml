@@ -29,5 +29,12 @@
 			android:defaultValue="false"
 			android:summaryOn="@string/speaker_on"
 			android:summaryOff="@string/speaker_off" />	
+			
+		<CheckBoxPreference 
+			android:key="talkover"
+			android:title="@string/talk_over_title"
+			android:defaultValue="false"
+			android:summaryOn="@string/talk_over_on"
+			android:summaryOff="@string/talk_over_off" />	
 		
 </PreferenceScreen>

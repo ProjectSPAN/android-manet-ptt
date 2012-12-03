@@ -45,7 +45,7 @@ public class Main extends Activity implements ManetObserver {
 	
 	public static final int MIC_STATE_NORMAL   = 0;
 	public static final int MIC_STATE_PRESSED  = 1;
-	public static final int MIC_STATE_INUSE    = 2;
+	public static final int MIC_STATE_PLAYBACK = 2;
 	public static final int MIC_STATE_DISABLED = 3;
 	
 	private static int microphoneState = MIC_STATE_NORMAL;
@@ -130,8 +130,14 @@ public class Main extends Activity implements ManetObserver {
     	microphoneImage = (ImageView) findViewById(R.id.microphone_image);
     	microphoneImage.setOnTouchListener(new OnTouchListener() {
 			public boolean onTouch(View view, MotionEvent event) {
-				if ((getMicrophoneState() != MIC_STATE_DISABLED) &&
-					(getMicrophoneState() != MIC_STATE_INUSE)) {    		
+				boolean canTalk = false;
+				if (AudioSettings.getTalkOverState()) {
+					canTalk = true;
+				} else if ((getMicrophoneState() != MIC_STATE_DISABLED) &&
+					(getMicrophoneState() != MIC_STATE_PLAYBACK)) {    	
+					canTalk = true;
+				}
+				if (canTalk) {
 		    		switch(event.getAction()) {
 			    		case MotionEvent.ACTION_DOWN:    			
 			    			recorder.resumeAudio();
@@ -284,9 +290,9 @@ public class Main extends Activity implements ManetObserver {
     		microphoneState = MIC_STATE_PRESSED;
     		microphoneImage.setImageResource(R.drawable.microphone_pressed_image);
     		break;
-    	case MIC_STATE_INUSE:
-    		microphoneState = MIC_STATE_INUSE;
-    		microphoneImage.setImageResource(R.drawable.microphone_inuse_image);
+    	case MIC_STATE_PLAYBACK:
+    		microphoneState = MIC_STATE_PLAYBACK;
+    		microphoneImage.setImageResource(R.drawable.microphone_playback_image);
     		break; 
     	case MIC_STATE_DISABLED:
     		microphoneState = MIC_STATE_DISABLED;
@@ -354,13 +360,19 @@ public class Main extends Activity implements ManetObserver {
 					int currentProgress = player.getProgress();
 					
 					if(currentProgress != storedProgress) {
-						if(getMicrophoneState() != MIC_STATE_INUSE) {
-							recorder.pauseAudio();
-							setMicrophoneState(MIC_STATE_INUSE);							
+						if(getMicrophoneState() != MIC_STATE_PLAYBACK) {
+							if (!AudioSettings.getTalkOverState()) {
+								recorder.pauseAudio();
+								setMicrophoneState(MIC_STATE_PLAYBACK);	
+							} else {
+								if (getMicrophoneState() != MIC_STATE_PRESSED) {
+									setMicrophoneState(MIC_STATE_PLAYBACK);	
+								}
+							}
 						}						 							
 					}
 					else {
-						if(getMicrophoneState() == MIC_STATE_INUSE) {
+						if(getMicrophoneState() == MIC_STATE_PLAYBACK) {
 							if(channel.isRecorderEnabled()) {
 								setMicrophoneState(MIC_STATE_NORMAL);
 							} else {
