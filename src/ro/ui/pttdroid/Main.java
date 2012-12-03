@@ -44,9 +44,10 @@ import android.widget.Toast;
 
 public class Main extends Activity implements ManetObserver {
 	
-	public static final int MIC_STATE_NORMAL = 0;
-	public static final int MIC_STATE_PRESSED = 1;
-	public static final int MIC_STATE_DISABLED = 2;
+	public static final int MIC_STATE_NORMAL   = 0;
+	public static final int MIC_STATE_PRESSED  = 1;
+	public static final int MIC_STATE_INUSE    = 2;
+	public static final int MIC_STATE_DISABLED = 3;
 	
 	private static int microphoneState = MIC_STATE_NORMAL;
 	
@@ -130,7 +131,8 @@ public class Main extends Activity implements ManetObserver {
     	microphoneImage = (ImageView) findViewById(R.id.microphone_image);
     	microphoneImage.setOnTouchListener(new OnTouchListener() {
 			public boolean onTouch(View view, MotionEvent event) {
-				if(getMicrophoneState()!=MIC_STATE_DISABLED) {    		
+				if ((getMicrophoneState() != MIC_STATE_DISABLED) &&
+					(getMicrophoneState() != MIC_STATE_INUSE)) {    		
 		    		switch(event.getAction()) {
 			    		case MotionEvent.ACTION_DOWN:    			
 			    			recorder.resumeAudio();
@@ -287,10 +289,14 @@ public class Main extends Activity implements ManetObserver {
     		microphoneState = MIC_STATE_PRESSED;
     		microphoneImage.setImageResource(R.drawable.microphone_pressed_image);
     		break;
+    	case MIC_STATE_INUSE:
+    		microphoneState = MIC_STATE_INUSE;
+    		microphoneImage.setImageResource(R.drawable.microphone_inuse_image);
+    		break; 
     	case MIC_STATE_DISABLED:
     		microphoneState = MIC_STATE_DISABLED;
     		microphoneImage.setImageResource(R.drawable.microphone_disabled_image);
-    		break;    		
+    		break; 
     	}
     }
     
@@ -299,8 +305,9 @@ public class Main extends Activity implements ManetObserver {
     }
     
     private void pttReset() {
+		storedProgress = 0;
 		pttPause();
-		pttRelease();
+		pttRelease();		
 		pttInit();
 		pttResume();
     }
@@ -338,21 +345,33 @@ public class Main extends Activity implements ManetObserver {
     		player = new Player(channel);    		    		     		    	
     		recorder = new Recorder(channel);
     		
+    		// initial mic state
+    		if (channel instanceof BlankChannel) {
+    			setMicrophoneState(MIC_STATE_DISABLED);
+    		} else {
+    			setMicrophoneState(MIC_STATE_NORMAL);
+    		}
+    		
     		// Disable microphone when receiving data.
     		stateRunnable = new Runnable() {
 				
 				public void run() {					
 					int currentProgress = player.getProgress();
 					
-					if(currentProgress!=storedProgress) {
-						if(getMicrophoneState()!=MIC_STATE_DISABLED) {
+					if(currentProgress != storedProgress) {
+						if(getMicrophoneState() != MIC_STATE_INUSE) {
 							recorder.pauseAudio();
-							setMicrophoneState(MIC_STATE_DISABLED);							
+							setMicrophoneState(MIC_STATE_INUSE);							
 						}						 							
 					}
 					else {
-						if(getMicrophoneState()==MIC_STATE_DISABLED)
-							setMicrophoneState(MIC_STATE_NORMAL);
+						if(getMicrophoneState() == MIC_STATE_INUSE) {
+							if(channel instanceof BlankChannel) {
+								setMicrophoneState(MIC_STATE_DISABLED);
+							} else {
+								setMicrophoneState(MIC_STATE_NORMAL);
+							}
+						}
 					}
 					
 					storedProgress = currentProgress;

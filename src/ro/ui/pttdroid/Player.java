@@ -44,20 +44,20 @@ public class Player extends Thread {
 			while(isRunning()) {
 								
 				try {		
-					// player.stop(); // STOKER
+					track.stop(); // STOKER
 					
 					socket.receive(packet);	// packet contains encodedFrame
 					
-					// player.play(); // STOKER
+					track.play(); // STOKER
 					
 					Log.d("Player", "Player packet length: " + packet.getLength()); // DEBUG: STOKER
 					
 					// If echo is turned off and I was the packet sender then skip playing
-					if(AudioSettings.getEchoState()==AudioSettings.ECHO_OFF && PhoneIPs.contains(packet.getAddress()))
+					if(AudioSettings.getEchoState() == AudioSettings.ECHO_OFF && PhoneIPs.contains(packet.getAddress())) // TODO
 						continue;
 					
 					// Decode audio
-					if(AudioSettings.useSpeex()==AudioSettings.USE_SPEEX) {
+					if(AudioSettings.useSpeex() == AudioSettings.USE_SPEEX) {
 						Speex.decode(encodedFrame, encodedFrame.length, pcmFrame);
 						track.write(pcmFrame, 0, AudioParams.FRAME_SIZE);
 					}
@@ -127,7 +127,7 @@ public class Player extends Thread {
 			
 			packet = new DatagramPacket(encodedFrame, encodedFrame.length);			
 			
-			track.play();				
+			// track.play(); // STOKER			
 		}
 		catch(IOException e) {
 			e.printStackTrace();
