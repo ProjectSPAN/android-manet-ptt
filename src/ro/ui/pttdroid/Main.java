@@ -3,6 +3,7 @@ package ro.ui.pttdroid;
 import java.util.HashSet;
 import java.util.List;
 
+import ro.ui.pttdroid.channels.BlankChannel;
 import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.channels.ChannelHelper;
 import ro.ui.pttdroid.channels.ViewChannel;
@@ -11,7 +12,6 @@ import ro.ui.pttdroid.groups.GroupHelper;
 import ro.ui.pttdroid.groups.ViewGroups;
 import ro.ui.pttdroid.service.ConnectionService;
 import ro.ui.pttdroid.settings.AudioSettings;
-import ro.ui.pttdroid.settings.CommSettings;
 import android.adhoc.manet.ManetHelper;
 import android.adhoc.manet.ManetObserver;
 import android.adhoc.manet.routing.Node;
@@ -60,10 +60,8 @@ public class Main extends Activity implements ManetObserver {
 	private Spinner spnChannel = null;
 	private ImageButton btnInfo = null;
 	
-    private GroupHelper groupHelper = null;
-	private ChannelHelper channelHelper = null;
 	private List<Channel> channels = null;
-	private Channel channel = null;
+	private Channel channel = ChannelHelper.getBlankChannel();
 	
 	private ManetHelper manet = null;
 	
@@ -91,34 +89,15 @@ public class Main extends Activity implements ManetObserver {
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.main);
-        
-		manet = new ManetHelper(this);
-	    manet.registerObserver(this);
-        
-    	microphoneImage = (ImageView) findViewById(R.id.microphone_image);
-    	microphoneImage.setOnTouchListener(new OnTouchListener() {
-			public boolean onTouch(View view, MotionEvent event) {
-				if(getMicrophoneState()!=MIC_STATE_DISABLED) {    		
-		    		switch(event.getAction()) {
-			    		case MotionEvent.ACTION_DOWN:    			
-			    			recorder.resumeAudio();
-			    			setMicrophoneState(MIC_STATE_PRESSED);
-			    			break;
-			    		case MotionEvent.ACTION_UP:
-			    			setMicrophoneState(MIC_STATE_NORMAL);
-			    			recorder.pauseAudio();    			
-			    			break;
-		    		}
-		    	}
-		    	return true;
-			}
-    	});
-    	
+            	
     	spnChannel = (Spinner) findViewById(R.id.spnChannel);
     	spnChannel.setOnItemSelectedListener(new OnItemSelectedListener() {
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long index) {
 				Channel selection = (Channel) spnChannel.getAdapter().getItem(position);
-				channel = selection; // TODO
+				if (!selection.equals(channel)) {
+					channel = selection;
+					pttReset();
+				}
 			}
 
 			public void onNothingSelected(AdapterView<?> parent) {
@@ -148,14 +127,35 @@ public class Main extends Activity implements ManetObserver {
 	  		}
 		});
     	
- 		SharedPreferences prefs = getSharedPreferences(GroupHelper.GROUP_PREFS, MODE_PRIVATE);
- 		groupHelper = new GroupHelper(prefs);
-		channelHelper = new ChannelHelper(groupHelper);
-	    
+    	microphoneImage = (ImageView) findViewById(R.id.microphone_image);
+    	microphoneImage.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View view, MotionEvent event) {
+				if(getMicrophoneState()!=MIC_STATE_DISABLED) {    		
+		    		switch(event.getAction()) {
+			    		case MotionEvent.ACTION_DOWN:    			
+			    			recorder.resumeAudio();
+			    			setMicrophoneState(MIC_STATE_PRESSED);
+			    			break;
+			    		case MotionEvent.ACTION_UP:
+			    			setMicrophoneState(MIC_STATE_NORMAL);
+			    			recorder.pauseAudio();    			
+			    			break;
+		    		}
+		    	}
+		    	return true;
+			}
+    	});
+    	
+    	GroupHelper.getSettings(this); 
+    	ChannelHelper.getSettings(this);
+    	
+		manet = new ManetHelper(this);
+	    manet.registerObserver(this);
+    	
    		// start service so that it runs even if no active activities are bound to it
    		startService(new Intent(this, ConnectionService.class));
 		
-        init();
+        pttInit();
     }
     
     @Override
@@ -170,26 +170,22 @@ public class Main extends Activity implements ManetObserver {
     @Override
     public void onStart() {
     	super.onStart();
-
+    	pttResume();
+    }
+    
+    // activity comes to the foreground
+    @Override
+    public void onResume() {
+    	super.onResume();
 		updateChannelList();
-		
-    	// Initialize codec 
-    	Speex.open(AudioSettings.getSpeexQuality());
-    	
-    	player.resumeAudio();
     }
     
     @Override
     public void onStop() {
     	super.onStop();
-    	
-    	player.pauseAudio();
-    	recorder.pauseAudio();    	
-    	
-    	// Release codec resources
-    	Speex.close();
+    	pttPause();
     }
-            
+                
     @Override
     public void onDestroy() {
     	super.onDestroy();
@@ -200,7 +196,7 @@ public class Main extends Activity implements ManetObserver {
 			manet.disconnectFromService();
         }
     	
-    	release();    	
+    	pttRelease();    	
     }
     
     @Override
@@ -214,10 +210,12 @@ public class Main extends Activity implements ManetObserver {
     	Intent i; 
     	
     	switch(item.getItemId()) {
+    		/*
 	    	case R.id.settings_comm:
 	    		i = new Intent(this, CommSettings.class);
 	    		startActivityForResult(i, 0);    		
 	    		return true;
+	    	*/
 	    	case R.id.settings_audio:
 	    		i = new Intent(this, AudioSettings.class);
 	    		startActivityForResult(i, 0);    		
@@ -234,7 +232,7 @@ public class Main extends Activity implements ManetObserver {
     }
     
     private void updateChannelList() {
- 		channels = channelHelper.getChannels();
+ 		channels = ChannelHelper.getChannels();
  		
 		ArrayAdapter<Channel> adapter = 
 				new ArrayAdapter<Channel>(this, android.R.layout.simple_spinner_item, channels);
@@ -275,8 +273,8 @@ public class Main extends Activity implements ManetObserver {
     
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	CommSettings.getSettings(this);     	    	
-    	AudioSettings.getSettings(this);    	
+    	// CommSettings.getSettings(this);     	    	
+    	// AudioSettings.getSettings(this);    	
     }
     
     public synchronized void setMicrophoneState(int state) {
@@ -300,25 +298,48 @@ public class Main extends Activity implements ManetObserver {
     	return microphoneState;
     }
     
-    private void init() {    	
+    private void pttReset() {
+		pttPause();
+		pttRelease();
+		pttInit();
+		pttResume();
+    }
+    
+    private void pttResume() {
+    	// Initialize codec 
+    	Speex.open(AudioSettings.getSpeexQuality());
+    	
+    	player.resumeAudio();
+    }
+    
+    private void pttPause() {
+    	player.pauseAudio();
+    	recorder.pauseAudio();    	
+    	
+    	// Release codec resources
+    	Speex.close();
+    }
+    
+    private void pttInit() {    	
     	// When the volume keys will be pressed the audio stream volume will be changed. 
     	setVolumeControlStream(AudioManager.STREAM_MUSIC);
-    	    	    	
+    	    	    	    	
     	/*
     	 * If the activity is first time created and not destroyed and created again like on an orientation screen change event.
     	 * This will be executed only once.
     	 */    	    	    	    	
     	if(isStarting) {
-        	// STOKER
         	WifiManager wm = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         	multicastLock = wm.createMulticastLock("PTT");
         	multicastLock.acquire();
     		
-    		CommSettings.getSettings(this);
-    		AudioSettings.getSettings(this);
-    		    	    	    		
-    		player = new Player();    		    		     		    	
-    		recorder = new Recorder();
+        	// TODO
+    		// CommSettings.getSettings(this);
+    		// AudioSettings.getSettings(this);
+    		// channel.getSettings(this);    	
+        	
+    		player = new Player(channel);    		    		     		    	
+    		recorder = new Recorder(channel);
     		
     		// Disable microphone when receiving data.
     		stateRunnable = new Runnable() {
@@ -352,31 +373,28 @@ public class Main extends Activity implements ManetObserver {
     	}
     }
     
-    private void release() {    	
-    	// If the back key was pressed.
-    	if(isFinishing()) {
-        	// STOKER
-        	multicastLock.release();
-    		
-    		handler.removeCallbacks(stateRunnable);
-    		handler.removeCallbacks(channelRunnable);
-
-    		// Force threads to finish.
-    		player.finish();    		    		
-    		recorder.finish();
-    		
-    		try {
-    			player.join();
-    			recorder.join();
-    		}
-    		catch(InterruptedException e) {
-    			Log.d("PTT", e.toString());
-    		}
-    		player = null;
-    		recorder = null;
-    	    		
-    		// Resetting isStarting.
-    		isStarting = true;     		
+    private void pttRelease() {
+    	if (isStarting == false) {
+	    	multicastLock.release();
+			
+			handler.removeCallbacks(stateRunnable);
+	
+			// Force threads to finish.
+			player.finish();    		    		
+			recorder.finish();
+			
+			try {
+				player.join();
+				recorder.join();
+			}
+			catch(InterruptedException e) {
+				Log.d("PTT", e.toString());
+			}
+			player = null;
+			recorder = null;
+		    		
+			// Resetting isStarting.
+			isStarting = true;
     	}
     }
     
@@ -396,7 +414,7 @@ public class Main extends Activity implements ManetObserver {
 	}
 
 	public void onServiceDisconnected() {
-		// TODO Auto-generated method stub
+		handler.removeCallbacks(channelRunnable);
 	}
 
 	public void onServiceStarted() {
@@ -420,7 +438,7 @@ public class Main extends Activity implements ManetObserver {
 	}
 
 	public void onPeersUpdated(HashSet<Node> peers) {
-		channelHelper.updatePeers(peers);
+		ChannelHelper.updatePeers(peers);
 	}
 
 	public void onError(String error) {

@@ -21,4 +21,9 @@ public class GroupChannel extends Channel {
 		}
 		return false;
 	}
+
+	@Override
+	public int getCastType() {
+		return Channel.MULTICAST; // TODO
+	}
 }

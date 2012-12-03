@@ -16,7 +16,6 @@ import android.adhoc.manet.system.ManetConfig;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,8 +32,6 @@ public class CreateGroup extends ListActivity implements ManetObserver {
 	
     private Button btnCommit = null;
     private Button btnCancel = null;
-	
-    private GroupHelper groupHelper = null;
     
     private List<String> peers = null;
     
@@ -63,9 +60,6 @@ public class CreateGroup extends ListActivity implements ManetObserver {
 		});
 	  	
  		mainListView = getListView();
- 		
- 		SharedPreferences prefs = getSharedPreferences(GroupHelper.GROUP_PREFS, MODE_PRIVATE);
- 		groupHelper = new GroupHelper(prefs);
     }
 	
     @Override
@@ -151,7 +145,7 @@ public class CreateGroup extends ListActivity implements ManetObserver {
             		if (name.length() == 0) {
             			openBlankNameDialog();
             		} else {
-            			groupHelper.createGroup(name, peers);
+            			GroupHelper.createGroup(name, peers);
             			finish();
             		}
                 }

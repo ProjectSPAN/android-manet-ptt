@@ -6,7 +6,6 @@ import ro.ui.pttdroid.R;
 
 import android.app.ListActivity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,7 +20,6 @@ public class ViewGroups extends ListActivity {
 	
     private Button btnCreate = null;
 	
-    private GroupHelper groupHelper = null;
 	private List<Group> groups = null;
     
 	/** Called when the activity is first created. */
@@ -53,16 +51,13 @@ public class ViewGroups extends ListActivity {
 	public void onStart() {
 		super.onStart();
 		
- 		SharedPreferences prefs = getSharedPreferences(GroupHelper.GROUP_PREFS, MODE_PRIVATE);
- 		groupHelper = new GroupHelper(prefs);
-		
- 		groups = groupHelper.getGroups();
+ 		groups = GroupHelper.getGroups();
  		
  		showGroups();
 	}
 	
 	private void showGroups() {
-		String[] names = groupHelper.getNames(groups);
+		String[] names = GroupHelper.getNames(groups);
 		
  		mainListView.setAdapter(new ArrayAdapter<String>(this,
  				android.R.layout.simple_list_item_1, names));

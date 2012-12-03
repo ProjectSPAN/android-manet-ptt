@@ -6,15 +6,14 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.codecs.Speex;
 import ro.ui.pttdroid.settings.AudioSettings;
-import ro.ui.pttdroid.settings.CommSettings;
 import ro.ui.pttdroid.util.AudioParams;
 import ro.ui.pttdroid.util.PhoneIPs;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder.AudioSource;
-import android.util.Log;
 
 public class Recorder extends Thread {
 	
@@ -38,7 +37,13 @@ public class Recorder extends Thread {
 	
 	private short[] pcmFrame = new short[AudioParams.FRAME_SIZE];
 	private byte[] encodedFrame;
+	
+	private Channel channel = null;
 			
+	public Recorder(Channel channel) {
+		this.channel = channel;
+	}
+	
 	public void run() {
 		// Set audio specific thread priority
 		android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
@@ -49,7 +54,7 @@ public class Recorder extends Thread {
 				
 				try {		
 					// Read PCM from the microphone buffer & encode it
-					if(AudioSettings.useSpeex()==AudioSettings.USE_SPEEX) {
+					if(AudioSettings.useSpeex() == AudioSettings.USE_SPEEX) {
 						recorder.read(pcmFrame, 0, AudioParams.FRAME_SIZE);
 						Speex.encode(pcmFrame, encodedFrame);						
 					}
@@ -58,10 +63,12 @@ public class Recorder extends Thread {
 					}
 																		
 					// Send encoded frame packed within an UDP datagram
-					socket.send(packet);
+					if (packet.getAddress() != null) { // TODO: blank channel
+						socket.send(packet);
+					}
 				}
 				catch(IOException e) {
-					Log.d("Recorder", e.toString());
+					e.printStackTrace();
 				}	
 			}		
 		
@@ -76,7 +83,7 @@ public class Recorder extends Thread {
 						this.wait();
 				}
 				catch(InterruptedException e) {
-					Log.d("Recorder", e.toString());
+					e.printStackTrace();
 				}
 			}					
 		}							
@@ -86,33 +93,33 @@ public class Recorder extends Thread {
 		try {	    	
 			PhoneIPs.load();
 			
+			InetAddress addr = channel.addr;
 			socket = new DatagramSocket();
 			socket.setSoTimeout(SO_TIMEOUT);
-			InetAddress addr = null;
 			
-			switch(CommSettings.getCastType()) {
-			case CommSettings.BROADCAST:
-				socket.setBroadcast(true);		
-				addr = CommSettings.getBroadcastAddr();
-				break;
-			case CommSettings.MULTICAST:
-				addr = CommSettings.getMulticastAddr();					
-				break;
-			case CommSettings.UNICAST:
-				addr = CommSettings.getUnicastAddr();					
-				break;
+			switch(channel.getCastType()) {
+				case Channel.BROADCAST:
+					socket.setBroadcast(true);
+					break;
+				case Channel.MULTICAST:
+					// nothing				
+					break;
+				case Channel.UNICAST:
+					// nothing					
+					break;
 			}							
 			
-			if(AudioSettings.useSpeex()==AudioSettings.USE_SPEEX)
+			if(AudioSettings.useSpeex() == AudioSettings.USE_SPEEX) {
 				encodedFrame = new byte[Speex.getEncodedSize(AudioSettings.getSpeexQuality())];
-			else 
+			} else { 
 				encodedFrame = new byte[AudioParams.FRAME_SIZE_IN_BYTES];
+			}
 			
 			packet = new DatagramPacket(
 					encodedFrame, 
 					encodedFrame.length, 
 					addr, 
-					CommSettings.getPort());
+					channel.port);
 
 	    	recorder = new AudioRecord(
 	    			AudioSource.MIC, 
@@ -124,14 +131,19 @@ public class Recorder extends Thread {
 			recorder.startRecording();				
 		}
 		catch(SocketException e) {
-			Log.d("Recorder", e.toString());
+			e.printStackTrace();
 		}	
 	}
 	
-	private void release() {			
-		if(recorder!=null) {
+	private void release() {
+		if(socket != null) {
+			socket.close();
+			socket = null;
+		}
+		if(recorder != null) {
 			recorder.stop();
 			recorder.release();
+			recorder = null;
 		}
 	}
 	
@@ -145,8 +157,7 @@ public class Recorder extends Thread {
 	}
 		
 	public synchronized void pauseAudio() {				
-		isRunning = false;	
-		socket.close();
+		isRunning = false;
 	}	 
 		
 	public synchronized boolean isFinishing() {
@@ -158,5 +169,4 @@ public class Recorder extends Thread {
 		isFinishing = true;		
 		this.notify();
 	}
-	
 }

@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 public class GroupHelper {
 	
@@ -16,18 +18,18 @@ public class GroupHelper {
 	public static final String GROUP_NAME  = "group_name";
 	public static final String GROUP_LIST  = "group_list";
 	
-	private Map<Integer, Group> groupMap = null;
+	private static Map<Integer, Group> groupMap = null;
 	
-	private SharedPreferences prefs = null;
+	private static SharedPreferences prefs = null;
 	
-	private int nextId = -1;
+	private static int nextId = -1;
 	
-	public GroupHelper(SharedPreferences prefs) {
-		this.prefs = prefs;
+	public static void getSettings(Context context) {
+		prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		loadGroups();
 	}
 	
-	private void loadGroups() {
+	private static void loadGroups() {
 		groupMap = new HashMap<Integer, Group>(); // TODO: sort alphabetically
 		
 		int id = 0;
@@ -50,16 +52,16 @@ public class GroupHelper {
 		nextId = id; // next group id
 	}
 	
-	public List<Group> getGroups() {
+	public static List<Group> getGroups() {
 		List<Group> groups = new ArrayList<Group>(groupMap.values());
 		return groups;
 	}
 	
-	public Group getGroup(int index) {
+	public static Group getGroup(int index) {
 		return groupMap.get(index);
 	}
 	
-	public String[] getNames(List<Group> groups) {
+	public static String[] getNames(List<Group> groups) {
 		String[] names = new String[groups.size()];
 		for (int i = 0; i < groups.size(); i ++) {
 			names[i] = groups.get(i).name;
@@ -67,7 +69,7 @@ public class GroupHelper {
 		return names;
 	}
 	
-	public Group createGroup(String name, List<String> peers) {
+	public static Group createGroup(String name, List<String> peers) {
 		String items = "";
 		for (int i = 0; i < peers.size(); i++) {
 			items += peers.get(i) + ",";
@@ -90,7 +92,7 @@ public class GroupHelper {
 		return group;
 	}
 	
-	public void deleteGroup(int id) {
+	public static void deleteGroup(int id) {
 		SharedPreferences.Editor prefEditor = prefs.edit();
 		
 		prefEditor.remove(GROUP_NAME + "." + id);

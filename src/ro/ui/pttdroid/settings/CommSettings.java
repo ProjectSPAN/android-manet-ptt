@@ -19,10 +19,12 @@ public class CommSettings extends PreferenceActivity {
 	private static InetAddress multicastAddr;
 	private static InetAddress unicastAddr;	
 	
+	/*
 	public static final int BROADCAST = 0;
 	public static final int MULTICAST = 1;
 	public static final int UNICAST = 2;
-		
+	*/
+	
 	private static int castType;	
 	private static int port;	
 	
@@ -62,10 +64,13 @@ public class CommSettings extends PreferenceActivity {
 		}
 	}
 	
+	/*
 	public static int getCastType() {
 		return castType;
 	}
+	*/
 		
+	/*
 	public static InetAddress getBroadcastAddr() {
 		return broadcastAddr;
 	}	
@@ -81,5 +86,5 @@ public class CommSettings extends PreferenceActivity {
 	public static int getPort() {
 		return port;
 	}		
-
+	*/
 }

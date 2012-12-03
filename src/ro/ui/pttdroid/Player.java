@@ -5,9 +5,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.MulticastSocket;
 
+import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.codecs.Speex;
 import ro.ui.pttdroid.settings.AudioSettings;
-import ro.ui.pttdroid.settings.CommSettings;
 import ro.ui.pttdroid.util.AudioParams;
 import ro.ui.pttdroid.util.PhoneIPs;
 import android.media.AudioFormat;
@@ -17,9 +17,9 @@ import android.util.Log;
 
 public class Player extends Thread {
 		
-	private AudioTrack player;
+	private AudioTrack track;
 	private boolean isRunning = true;	
-	private boolean isFinishing = false;	
+	private boolean isFinishing = false;
 	
 	private DatagramSocket socket;
 	private MulticastSocket multicastSocket;
@@ -29,6 +29,12 @@ public class Player extends Thread {
 	private byte[] encodedFrame;
 	
 	private int progress = 0;
+	
+	private Channel channel = null;
+	
+	public Player(Channel channel) {
+		this.channel = channel;
+	}
 				
 	public void run() {
 		android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);				 
@@ -53,28 +59,29 @@ public class Player extends Thread {
 					// Decode audio
 					if(AudioSettings.useSpeex()==AudioSettings.USE_SPEEX) {
 						Speex.decode(encodedFrame, encodedFrame.length, pcmFrame);
-						player.write(pcmFrame, 0, AudioParams.FRAME_SIZE);
+						track.write(pcmFrame, 0, AudioParams.FRAME_SIZE);
 					}
 					else {			
-						player.write(encodedFrame, 0, AudioParams.FRAME_SIZE_IN_BYTES);
+						track.write(encodedFrame, 0, AudioParams.FRAME_SIZE_IN_BYTES);
 					}	
 										
 					// Make some progress
 					makeProgress();
 				}
 				catch(IOException e) {
-					Log.d("Player", e.toString());
+					e.printStackTrace();
 				}	
 			}		
 		
 			release();	
 			synchronized(this) {
 				try {	
-					if(!isFinishing())
+					if(!isFinishing()) {
 						this.wait();
+					}
 				}
 				catch(InterruptedException e) {
-					Log.d("Player", e.toString());
+					e.printStackTrace();
 				}
 			}			
 		}				
@@ -89,7 +96,7 @@ public class Player extends Thread {
 				streamType = AudioManager.STREAM_MUSIC;
 			}
 			
-			player = new AudioTrack(
+			track = new AudioTrack(
 					streamType,
 					AudioParams.SAMPLE_RATE, 
 					AudioFormat.CHANNEL_CONFIGURATION_MONO, 
@@ -97,39 +104,40 @@ public class Player extends Thread {
 					AudioParams.TRACK_BUFFER_SIZE, 
 					AudioTrack.MODE_STREAM);	
 
-			switch(CommSettings.getCastType()) {
-			case CommSettings.BROADCAST:
-				socket = new DatagramSocket(CommSettings.getPort());
-				socket.setBroadcast(true);
-				break;
-			case CommSettings.MULTICAST:
-				multicastSocket = new MulticastSocket(CommSettings.getPort());
-				multicastSocket.joinGroup(CommSettings.getMulticastAddr());
-				socket = multicastSocket;				
-				break;
-			case CommSettings.UNICAST:
-				socket = new DatagramSocket(CommSettings.getPort());
-				break;
+			switch(channel.getCastType()) {
+				case Channel.BROADCAST:
+					socket = new DatagramSocket(channel.port);
+					socket.setBroadcast(true);
+					break;
+				case Channel.MULTICAST:
+					multicastSocket = new MulticastSocket(channel.port);
+					multicastSocket.joinGroup(channel.addr);
+					socket = multicastSocket;
+					break;
+				case Channel.UNICAST:
+					socket = new DatagramSocket(channel.port);
+					break;
 			}							
 			
-			if(AudioSettings.useSpeex()==AudioSettings.USE_SPEEX) 
+			if(AudioSettings.useSpeex()==AudioSettings.USE_SPEEX) {
 				encodedFrame = new byte[Speex.getEncodedSize(AudioSettings.getSpeexQuality())];
-			else 
+			} else { 
 				encodedFrame = new byte[AudioParams.FRAME_SIZE_IN_BYTES];
+			}
 			
 			packet = new DatagramPacket(encodedFrame, encodedFrame.length);			
 			
-			player.play();				
+			track.play();				
 		}
 		catch(IOException e) {
-			Log.d("Player", e.toString());
+			e.printStackTrace();
 		}		
 	}
 	
 	private void release() {
-		if(player!=null) {
-			player.stop();		
-			player.release();
+		if(track != null) {
+			track.stop();		
+			track.release();
 		}
 	}
 	
@@ -168,13 +176,15 @@ public class Player extends Thread {
 	
 	private void leaveGroup() {
 		try {
-			multicastSocket.leaveGroup(CommSettings.getMulticastAddr());
+			if (multicastSocket != null) {
+				multicastSocket.leaveGroup(channel.addr);
+			}
 		}
 		catch(IOException e) {
-			Log.d("Player", e.toString());
+			e.printStackTrace();
 		}
 		catch(NullPointerException e) {
-			Log.d("Player", e.toString());
+			e.printStackTrace();
 		}		
 	}
 		

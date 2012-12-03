@@ -3,7 +3,6 @@ package ro.ui.pttdroid.groups;
 import ro.ui.pttdroid.R;
 
 import android.app.ListActivity;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -16,7 +15,6 @@ public class ViewGroup extends ListActivity {
 	
     private Button btnDelete = null;
 	
-    private GroupHelper groupHelper = null;
 	private Group group = null;
     
 	/** Called when the activity is first created. */
@@ -29,7 +27,7 @@ public class ViewGroup extends ListActivity {
 	    btnDelete = (Button) findViewById(R.id.btnDelete);
 	    btnDelete.setOnClickListener(new View.OnClickListener() {
 	  		public void onClick(View v) {
-	    		groupHelper.deleteGroup(group.id);
+	    		GroupHelper.deleteGroup(group.id);
 	    		finish();
 	  		}
 		});
@@ -38,10 +36,7 @@ public class ViewGroup extends ListActivity {
  		
  		int index = getIntent().getExtras().getInt(GroupHelper.GROUP_INDEX);
  		
- 		SharedPreferences prefs = getSharedPreferences(GroupHelper.GROUP_PREFS, MODE_PRIVATE);
- 		groupHelper = new GroupHelper(prefs);
- 		
- 		group = groupHelper.getGroup(index);
+ 		group = GroupHelper.getGroup(index);
  		
  		showGroup();
     }
