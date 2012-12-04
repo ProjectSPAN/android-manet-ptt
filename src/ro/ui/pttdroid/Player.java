@@ -7,6 +7,8 @@ import java.net.MulticastSocket;
 import java.net.SocketException;
 
 import ro.ui.pttdroid.channels.Channel;
+import ro.ui.pttdroid.channels.ListenOnlyChannel;
+import ro.ui.pttdroid.channels.NullChannel;
 import ro.ui.pttdroid.codecs.Speex;
 import ro.ui.pttdroid.settings.AudioSettings;
 import ro.ui.pttdroid.util.AudioParams;
@@ -55,7 +57,7 @@ public class Player extends Thread {
 					
 					track.play(); // STOKER
 					
-					Log.d("Player", "Player packet length: " + packet.getLength()); // DEBUG: STOKER
+					Log.d("Player", "Packet port: " + packet.getPort() + " Packet length: " + packet.getLength()); // DEBUG: STOKER
 					
 					// If echo is turned off and I was the packet sender then skip playing
 					if(AudioSettings.getEchoState() == AudioSettings.ECHO_OFF && PhoneIPs.contains(packet.getAddress())) // TODO
@@ -115,16 +117,21 @@ public class Player extends Thread {
 
 			switch(channel.getCastType()) {
 				case Channel.BROADCAST:
-					socket = new DatagramSocket(channel.port);
+					socket = new DatagramSocket(channel.rxPort);
 					socket.setBroadcast(true);
 					break;
 				case Channel.MULTICAST:
-					multicastSocket = new MulticastSocket(channel.port);
+					multicastSocket = new MulticastSocket(channel.rxPort);
 					multicastSocket.joinGroup(channel.addr);
 					socket = multicastSocket;
 					break;
 				case Channel.UNICAST:
-					socket = new DatagramSocket(channel.port);
+					socket = new DatagramSocket(channel.rxPort);
+					
+					// TODO: filter out packets from everyone but peer
+					if (!(channel instanceof NullChannel) && !(channel instanceof ListenOnlyChannel)) {
+						socket.connect(channel.addr, Channel.DEFAULT_TX_PORT);
+					}
 					break;
 			}							
 			

@@ -98,7 +98,8 @@ public class Recorder extends Thread {
 			PhoneIPs.load();
 			
 			InetAddress addr = channel.addr;
-			socket = new DatagramSocket();
+			// socket = new DatagramSocket();
+			socket = new DatagramSocket(channel.txPort);
 			socket.setSoTimeout(SO_TIMEOUT);
 			
 			switch(channel.getCastType()) {
@@ -123,7 +124,7 @@ public class Recorder extends Thread {
 					encodedFrame, 
 					encodedFrame.length, 
 					addr, 
-					channel.port);
+					Channel.DEFAULT_RX_PORT); // TODO
 
 	    	recorder = new AudioRecord(
 	    			AudioSource.MIC, 

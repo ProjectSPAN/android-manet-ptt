@@ -13,9 +13,13 @@ public abstract class Channel {
 	public static final int MULTICAST = 1;
 	public static final int UNICAST   = 2;
 	
+	public static final int DEFAULT_TX_PORT = 2010;
+	public static final int DEFAULT_RX_PORT = 2011;
+	
 	public String name = null;
 	
-	public int port = 2010; // TODO: DEFAULT
+	public int txPort = DEFAULT_TX_PORT;
+	public int rxPort = DEFAULT_RX_PORT;
 	public InetAddress addr = null;
 	
 	public boolean valid = true;
