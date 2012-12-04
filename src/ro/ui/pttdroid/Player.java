@@ -62,7 +62,7 @@ public class Player extends Thread {
 					} catch(SocketTimeoutException e) {
 						track.stop();
 						socket.setSoTimeout(0);
-						socket.receive(packet);
+						socket.receive(packet); // block forever
 					}
 					
 					track.play(); // STOKER
