@@ -54,7 +54,6 @@ public class Player extends Thread {
 			while(isRunning()) {
 								
 				try {	
-					
 					// prevent buffer underrun, stop streaming when there's no data
 					try {
 						socket.setSoTimeout(SOCKET_TIMEOUT_MILLISEC);
@@ -65,10 +64,11 @@ public class Player extends Thread {
 						socket.receive(packet); // block forever
 					}
 					
-					track.play(); // STOKER
+					track.play();
 					
-					Log.d("Player", "Packet port: " + packet.getPort() + " Packet length: " + packet.getLength()); // DEBUG: STOKER
-					Log.d("Player", "AudioTrack.getPlaybackHeadPosition(): " + track.getPlaybackHeadPosition()); // DEBUG: STOKER
+					Log.d("Player", "Packet sender: " + packet.getAddress().getHostAddress() + 
+							" Packet port: " + packet.getPort() + " Packet length: " + packet.getLength()); // DEBUG: STOKER
+					// Log.d("Player", "AudioTrack.getPlaybackHeadPosition(): " + track.getPlaybackHeadPosition()); // DEBUG: STOKER
 					
 					// If echo is turned off and I was the packet sender then skip playing
 					if(AudioSettings.getEchoState() == AudioSettings.ECHO_OFF && PhoneIPs.contains(packet.getAddress())) // TODO
