@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.channels.ListenOnlyChannel;
@@ -20,6 +21,8 @@ import android.util.Log;
 
 public class Player extends Thread {
 		
+	private static final int SOCKET_TIMEOUT_MILLISEC = 1000;
+	
 	private AudioTrack track;
 	private boolean isRunning = true;	
 	private boolean isFinishing = false;
@@ -50,14 +53,22 @@ public class Player extends Thread {
 			init();
 			while(isRunning()) {
 								
-				try {		
-					track.stop(); // STOKER
+				try {	
 					
-					socket.receive(packet);	// packet contains encodedFrame
+					// prevent buffer underrun, stop streaming when there's no data
+					try {
+						socket.setSoTimeout(SOCKET_TIMEOUT_MILLISEC);
+						socket.receive(packet);	// packet contains encodedFrame
+					} catch(SocketTimeoutException e) {
+						track.stop();
+						socket.setSoTimeout(0);
+						socket.receive(packet);
+					}
 					
 					track.play(); // STOKER
 					
 					Log.d("Player", "Packet port: " + packet.getPort() + " Packet length: " + packet.getLength()); // DEBUG: STOKER
+					Log.d("Player", "AudioTrack.getPlaybackHeadPosition(): " + track.getPlaybackHeadPosition()); // DEBUG: STOKER
 					
 					// If echo is turned off and I was the packet sender then skip playing
 					if(AudioSettings.getEchoState() == AudioSettings.ECHO_OFF && PhoneIPs.contains(packet.getAddress())) // TODO
@@ -135,7 +146,7 @@ public class Player extends Thread {
 					break;
 			}							
 			
-			if(AudioSettings.useSpeex()==AudioSettings.USE_SPEEX) {
+			if(AudioSettings.useSpeex() == AudioSettings.USE_SPEEX) {
 				encodedFrame = new byte[Speex.getEncodedSize(AudioSettings.getSpeexQuality())];
 			} else { 
 				encodedFrame = new byte[AudioParams.FRAME_SIZE_IN_BYTES];
