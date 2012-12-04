@@ -38,6 +38,9 @@
     <string name="talk_over_title">Multiple speakers</string>
     <string name="talk_over_on">Can talk over fellow peers</string>
     <string name="talk_over_off">Can\'t talk over fellow peers</string>
+    <string name="vpn_title">Mesh P2P VPN</string>
+    <string name="vpn_on">Use mesh P2P VPN</string>
+    <string name="vpn_off">Don\'t use mesh P2P VPN</string>
     <string name="settings_reset_all_name">Reset All</string>
     <string name="settings_reset_all_label">Reset All</string>
     <string name="setting_reset_all_confirm">All settings were restored to their default values</string>

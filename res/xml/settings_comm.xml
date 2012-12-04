@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
 	<PreferenceCategory android:title="@string/set_cast_and_port">
 		<ListPreference
 			android:key="cast_type"
@@ -40,5 +41,12 @@
 			android:singleLine="true"
 			android:inputType="phone" />
 	</PreferenceCategory>
-			
+	-->
+		
+	<CheckBoxPreference 
+		android:key="vpn"
+		android:title="@string/vpn_title"
+		android:defaultValue="false"
+		android:summaryOn="@string/vpn_on"
+		android:summaryOff="@string/vpn_off" />		
 </PreferenceScreen>

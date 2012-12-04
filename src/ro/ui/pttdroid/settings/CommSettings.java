@@ -15,18 +15,23 @@ import android.util.Log;
 
 public class CommSettings extends PreferenceActivity {
 	
+	/*
 	private static InetAddress broadcastAddr;
 	private static InetAddress multicastAddr;
 	private static InetAddress unicastAddr;	
 	
-	/*
 	public static final int BROADCAST = 0;
 	public static final int MULTICAST = 1;
 	public static final int UNICAST = 2;
-	*/
 	
 	private static int castType;	
 	private static int port;	
+	*/
+	
+	private static boolean vpnState;
+
+	public static final boolean VPN_ON = true;
+	public static final boolean VPN_OFF = false;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -42,6 +47,9 @@ public class CommSettings extends PreferenceActivity {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		Resources res = context.getResources();
 		
+		vpnState = prefs.getBoolean("vpn", VPN_OFF);
+		
+		/*
 		try {
     		castType = Integer.parseInt(prefs.getString(
     				"cast_type", 
@@ -62,15 +70,18 @@ public class CommSettings extends PreferenceActivity {
 		catch(UnknownHostException e) {
 			Log.d("CommSettings", e.getMessage());
 		}
+		*/
+	}
+	
+	public static boolean getVpnState() {
+		return vpnState;
 	}
 	
 	/*
 	public static int getCastType() {
 		return castType;
 	}
-	*/
 		
-	/*
 	public static InetAddress getBroadcastAddr() {
 		return broadcastAddr;
 	}	

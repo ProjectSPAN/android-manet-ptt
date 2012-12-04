@@ -11,6 +11,7 @@ import ro.ui.pttdroid.groups.GroupHelper;
 import ro.ui.pttdroid.groups.ViewGroups;
 import ro.ui.pttdroid.service.ConnectionService;
 import ro.ui.pttdroid.settings.AudioSettings;
+import ro.ui.pttdroid.settings.CommSettings;
 import android.adhoc.manet.ManetHelper;
 import android.adhoc.manet.ManetObserver;
 import android.adhoc.manet.routing.Node;
@@ -221,12 +222,10 @@ public class Main extends Activity implements ManetObserver {
     	Intent i; 
     	
     	switch(item.getItemId()) {
-    		/*
 	    	case R.id.settings_comm:
 	    		i = new Intent(this, CommSettings.class);
 	    		startActivityForResult(i, 0);    		
 	    		return true;
-	    	*/
 	    	case R.id.settings_audio:
 	    		i = new Intent(this, AudioSettings.class);
 	    		startActivityForResult(i, 0);    		
@@ -292,7 +291,7 @@ public class Main extends Activity implements ManetObserver {
     
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	// CommSettings.getSettings(this);     	    	
+    	CommSettings.getSettings(this);     	    	
     	AudioSettings.getSettings(this);    	
     }
     

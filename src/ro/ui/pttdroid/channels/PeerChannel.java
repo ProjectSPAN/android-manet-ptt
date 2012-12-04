@@ -3,6 +3,8 @@ package ro.ui.pttdroid.channels;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import ro.ui.pttdroid.settings.CommSettings;
+
 import android.adhoc.manet.routing.Node;
 
 public class PeerChannel extends Channel {
@@ -11,6 +13,12 @@ public class PeerChannel extends Channel {
 	
 	public PeerChannel(Node peer) {
 		super(peer.userId); // default
+		
+		// TODO: DEBUG VPN
+		if (CommSettings.getVpnState()) {
+			String octets[] = peer.addr.split("\\.");
+			peer.addr = "2.2.2." + octets[3];
+		}
 		
 		if (peer.userId != null) {
 			name = peer.addr + " (" + peer.userId + ")";
