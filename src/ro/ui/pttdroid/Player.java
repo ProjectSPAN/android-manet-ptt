@@ -54,6 +54,11 @@ public class Player extends Thread {
 			while(isRunning()) {
 								
 				try {	
+					// TODO: prevent double playback on "hangup"
+					track.stop();
+					socket.receive(packet); // block forever
+					
+					/*
 					// prevent buffer underrun, stop streaming when there's no data
 					try {
 						socket.setSoTimeout(SOCKET_TIMEOUT_MILLISEC);
@@ -63,6 +68,7 @@ public class Player extends Thread {
 						socket.setSoTimeout(0);
 						socket.receive(packet); // block forever
 					}
+					*/
 					
 					track.play();
 					
