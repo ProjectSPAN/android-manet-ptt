@@ -3,6 +3,7 @@ package ro.ui.pttdroid.groups;
 import java.util.List;
 
 import ro.ui.pttdroid.R;
+import ro.ui.pttdroid.channels.Channel;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -41,7 +42,8 @@ public class ViewGroups extends ListActivity {
  		mainListView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long index) {				
 	    		Intent i = new Intent(ViewGroups.this, ViewGroup.class);
-				i.putExtra(GroupHelper.GROUP_INDEX, (int)index);
+	    		Group group = (Group) mainListView.getAdapter().getItem(position);
+				i.putExtra(GroupHelper.GROUP_ID, group.id);
 	    		startActivityForResult(i, 0);
 			}
 		});
@@ -57,11 +59,9 @@ public class ViewGroups extends ListActivity {
 	}
 	
 	private void showGroups() {
-		String[] names = GroupHelper.getNames(groups);
-		
- 		mainListView.setAdapter(new ArrayAdapter<String>(this,
- 				android.R.layout.simple_list_item_1, names));
-
+		ArrayAdapter<Group> adapter = 
+				new ArrayAdapter<Group>(this, android.R.layout.simple_list_item_1, groups);
+		mainListView.setAdapter(adapter);
  		mainListView.setItemsCanFocus(false);
  		mainListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 	}

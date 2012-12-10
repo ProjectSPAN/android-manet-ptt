@@ -14,18 +14,19 @@ import android.preference.PreferenceManager;
 
 public class GroupHelper {
 	
-	public static final String GROUP_PREFS = "groups";
-	public static final String GROUP_INDEX = "group_index"; // array index, not group id
+	public static final String GROUP_PREFS  = "groups";
+	public static final String GROUP_ID     = "group_id";
 	
-	public static final String GROUP_NAME  = "group_name";
-	public static final String GROUP_LIST  = "group_list";
-	public static final String GROUP_ADDR  = "group_addr";
+	public static final String GROUP_NAME   = "group_name";
+	public static final String GROUP_LIST   = "group_list";
+	public static final String GROUP_ADDR   = "group_addr";
+	public static final String GROUP_MAX_ID = "group_max_id"; 
 	
 	private static Map<Integer, Group> groupMap = null;
 	
 	private static SharedPreferences prefs = null;
 	
-	private static int nextId = -1;
+	private static int nextId = -1; // next group id
 	
 	public static void getSettings(Context context) {
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -35,8 +36,9 @@ public class GroupHelper {
 	private static void loadGroups() {
 		groupMap = new HashMap<Integer, Group>(); // TODO: sort alphabetically
 		
-		int id = 0;
-		while (true) {
+		nextId = prefs.getInt(GROUP_MAX_ID, -1) + 1;
+		
+		for (int id = 0; id < nextId; id++) {
 			if (prefs.contains(GROUP_NAME + "." + id)) {
 				String name = prefs.getString(GROUP_NAME + "." + id, "");
 				String list = prefs.getString(GROUP_LIST + "." + id, "");
@@ -52,13 +54,8 @@ public class GroupHelper {
 				} catch (UnknownHostException e) {
 					e.printStackTrace();
 				}
-			} else {
-				break; // stop search
 			}
-			id++;
 		}
-		
-		nextId = id; // next group id
 	}
 	
 	public static List<Group> getGroups() {
@@ -66,10 +63,11 @@ public class GroupHelper {
 		return groups;
 	}
 	
-	public static Group getGroup(int index) {
-		return groupMap.get(index);
+	public static Group getGroup(int id) {
+		return groupMap.get(id);
 	}
 	
+	/*
 	public static String[] getNames(List<Group> groups) {
 		String[] names = new String[groups.size()];
 		for (int i = 0; i < groups.size(); i ++) {
@@ -77,6 +75,7 @@ public class GroupHelper {
 		}
 		return names;
 	}
+	*/
 	
 	public static Group createGroup(String name, List<String> peers, InetAddress addr) {
 		String items = "";
@@ -92,6 +91,7 @@ public class GroupHelper {
 		prefEditor.putString(GROUP_NAME + "." + nextId, name);
 		prefEditor.putString(GROUP_LIST + "." + nextId, items);
 		prefEditor.putString(GROUP_ADDR + "." + nextId, addr.getHostAddress());
+		prefEditor.putInt(GROUP_MAX_ID, nextId);
 
 		prefEditor.commit();
 		

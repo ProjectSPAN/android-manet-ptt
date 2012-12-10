@@ -142,12 +142,14 @@ public class Main extends Activity implements ManetObserver {
 				}
 				if (canTalk) {
 		    		switch(event.getAction()) {
-			    		case MotionEvent.ACTION_DOWN:    			
+			    		case MotionEvent.ACTION_DOWN: 
+			    			player.pauseAudio(); // TODO
 			    			recorder.resumeAudio();
 			    			setMicrophoneState(MIC_STATE_PRESSED);
 			    			break;
 			    		case MotionEvent.ACTION_UP:
 			    			setMicrophoneState(MIC_STATE_NORMAL);
+			    			player.resumeAudio(); // TODO
 			    			recorder.pauseAudio();    			
 			    			break;
 		    		}
@@ -376,13 +378,13 @@ public class Main extends Activity implements ManetObserver {
 					
 					if(currentProgress != storedProgress) {
 						if(getMicrophoneState() != MIC_STATE_PLAYBACK) {
-							if (!AudioSettings.getTalkOverState()) {
-								recorder.pauseAudio();
-								setMicrophoneState(MIC_STATE_PLAYBACK);	
-							} else {
+							if (AudioSettings.getTalkOverState()) {
 								if (getMicrophoneState() != MIC_STATE_PRESSED) {
 									setMicrophoneState(MIC_STATE_PLAYBACK);	
 								}
+							} else {
+								recorder.pauseAudio();
+								setMicrophoneState(MIC_STATE_PLAYBACK);	
 							}
 						}						 							
 					}

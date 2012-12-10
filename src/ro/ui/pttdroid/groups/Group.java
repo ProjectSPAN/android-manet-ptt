@@ -16,4 +16,9 @@ public class Group {
 		this.peers = peers;
 		this.addr = addr;
 	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
 }

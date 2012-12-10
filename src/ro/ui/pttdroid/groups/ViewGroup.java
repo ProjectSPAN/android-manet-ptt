@@ -34,9 +34,9 @@ public class ViewGroup extends ListActivity {
 	  	
  		mainListView = getListView();
  		
- 		int index = getIntent().getExtras().getInt(GroupHelper.GROUP_INDEX);
+ 		int id = getIntent().getExtras().getInt(GroupHelper.GROUP_ID);
  		
- 		group = GroupHelper.getGroup(index);
+ 		group = GroupHelper.getGroup(id);
  		
  		showGroup();
     }
