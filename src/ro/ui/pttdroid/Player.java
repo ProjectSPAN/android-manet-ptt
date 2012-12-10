@@ -3,9 +3,12 @@ package ro.ui.pttdroid;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.HashMap;
+import java.util.Map;
 
 import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.channels.ListenOnlyChannel;
@@ -23,7 +26,7 @@ public class Player extends Thread {
 		
 	private static final int SOCKET_TIMEOUT_MILLISEC = 1000;
 	
-	private AudioTrack track;
+	private Map<InetAddress,AudioTrack> trackMap;
 	private boolean isRunning = true;	
 	private boolean isFinishing = false;
 	
@@ -40,6 +43,7 @@ public class Player extends Thread {
 	
 	public Player(Channel channel) {
 		this.channel = channel;
+		trackMap = new HashMap<InetAddress,AudioTrack>();
 	}
 				
 	public void run() {
@@ -49,13 +53,17 @@ public class Player extends Thread {
 			
 		android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);				 
 		
+		AudioTrack track = null; // current track
+		
 		while(!isFinishing()) {			
 			init();
 			while(isRunning()) {
 								
 				try {	
 					// TODO: prevent double playback on "hangup"
-					track.stop();
+					if (track != null) {
+						track.stop();
+					}
 					socket.receive(packet); // block forever
 					
 					/*
@@ -69,6 +77,29 @@ public class Player extends Thread {
 						socket.receive(packet); // block forever
 					}
 					*/
+					
+					// filter audio data to separate tracks based on sender address
+					InetAddress sender = packet.getAddress();
+					if (trackMap.containsKey(sender)) {
+						track = trackMap.get(sender);
+					} else {
+						int streamType;
+						if(AudioSettings.getSpeakerState() == AudioSettings.SPEAKER_OFF) {
+							streamType = AudioManager.STREAM_VOICE_CALL;
+						} else {
+							streamType = AudioManager.STREAM_MUSIC;
+						}
+						
+						track = new AudioTrack(
+								streamType,
+								AudioParams.SAMPLE_RATE, 
+								AudioFormat.CHANNEL_CONFIGURATION_MONO, 
+								AudioParams.ENCODING_PCM_NUM_BITS, 
+								AudioParams.TRACK_BUFFER_SIZE, 
+								AudioTrack.MODE_STREAM);	
+						
+						trackMap.put(sender, track);
+					}
 					
 					track.play();
 					
@@ -116,7 +147,8 @@ public class Player extends Thread {
 	}
 	
 	private void init() {	
-		try {						
+		try {			
+			/*
 			int streamType;
 			if(AudioSettings.getSpeakerState() == AudioSettings.SPEAKER_OFF) {
 				streamType = AudioManager.STREAM_VOICE_CALL;
@@ -131,7 +163,8 @@ public class Player extends Thread {
 					AudioParams.ENCODING_PCM_NUM_BITS, 
 					AudioParams.TRACK_BUFFER_SIZE, 
 					AudioTrack.MODE_STREAM);	
-
+			*/
+			
 			switch(channel.getCastType()) {
 				case Channel.BROADCAST:
 					socket = new DatagramSocket(channel.rxPort);
@@ -168,7 +201,7 @@ public class Player extends Thread {
 	}
 	
 	private void release() {
-		if(track != null) {
+		for (AudioTrack track : trackMap.values()) {
 			track.stop();		
 			track.release();
 		}
