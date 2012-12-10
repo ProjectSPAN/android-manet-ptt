@@ -27,6 +27,8 @@ public class Player extends Thread {
 	private static final int SOCKET_TIMEOUT_MILLISEC = 1000;
 	
 	private Map<InetAddress,AudioTrack> trackMap;
+	private AudioTrack track = null; // current track
+	
 	private boolean isRunning = true;	
 	private boolean isFinishing = false;
 	
@@ -52,8 +54,6 @@ public class Player extends Thread {
 		}
 			
 		android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);				 
-		
-		AudioTrack track = null; // current track
 		
 		while(!isFinishing()) {			
 			init();
@@ -205,6 +205,8 @@ public class Player extends Thread {
 			track.stop();		
 			track.release();
 		}
+		trackMap.clear();
+		track = null;
 	}
 	
 	private synchronized void makeProgress() {
