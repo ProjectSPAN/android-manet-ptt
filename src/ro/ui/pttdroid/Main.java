@@ -48,7 +48,6 @@ public class Main extends Activity implements ManetObserver {
 	public static final int MIC_STATE_PRESSED  = 1;
 	public static final int MIC_STATE_PLAYBACK = 2;
 	public static final int MIC_STATE_DISABLED = 3;
-	public static final int MIC_STATE_CONFLICT = 4;
 	
 	private static int microphoneState = MIC_STATE_NORMAL;
 	
@@ -145,11 +144,7 @@ public class Main extends Activity implements ManetObserver {
 			    		case MotionEvent.ACTION_DOWN: 
 			    			// player.pauseAudio(); // TODO
 			    			recorder.resumeAudio();
-			    			if (getMicrophoneState() == MIC_STATE_PLAYBACK) {
-			    				setMicrophoneState(MIC_STATE_CONFLICT);
-			    			} else {
-			    				setMicrophoneState(MIC_STATE_PRESSED);
-			    			}
+			    			setMicrophoneState(MIC_STATE_PRESSED);
 			    			break;
 			    		case MotionEvent.ACTION_UP:
 			    			setMicrophoneState(MIC_STATE_NORMAL);
@@ -319,10 +314,6 @@ public class Main extends Activity implements ManetObserver {
     		microphoneState = MIC_STATE_DISABLED;
     		microphoneImage.setImageResource(R.drawable.microphone_disabled_image);
     		break; 
-    	case MIC_STATE_CONFLICT:
-    		microphoneState = MIC_STATE_CONFLICT;
-    		microphoneImage.setImageResource(R.drawable.microphone_conflict_image);
-    		break; 
     	}
     }
     
@@ -387,7 +378,7 @@ public class Main extends Activity implements ManetObserver {
 					if(currentProgress != storedProgress) {
 						if(getMicrophoneState() != MIC_STATE_PLAYBACK) {
 							if (AudioSettings.getTalkOverState()) {
-								if (getMicrophoneState() != MIC_STATE_PRESSED && getMicrophoneState() != MIC_STATE_CONFLICT) {
+								if (getMicrophoneState() != MIC_STATE_PRESSED) {
 									setMicrophoneState(MIC_STATE_PLAYBACK);	
 								}
 							} else {
