@@ -13,13 +13,11 @@ public abstract class Channel {
 	public static final int MULTICAST = 1;
 	public static final int UNICAST   = 2;
 	
-	public static final int DEFAULT_TX_PORT = 2010;
-	public static final int DEFAULT_RX_PORT = 2011;
+	public static final int DEFAULT_PORT = 2011;
 	
 	public String name = null;
 	
-	public int txPort = DEFAULT_TX_PORT;
-	public int rxPort = DEFAULT_RX_PORT;
+	public int port = DEFAULT_PORT;
 	public InetAddress addr = null;
 	
 	public boolean valid = true;
@@ -35,8 +33,6 @@ public abstract class Channel {
 	
 	@Override
 	public abstract boolean equals(Object other);
-	
-	public abstract int getCastType();
 	
 	public abstract boolean isRecorderEnabled();
 	

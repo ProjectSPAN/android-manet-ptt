@@ -1,18 +1,18 @@
-package ro.ui.pttdroid;
+package ro.ui.pttdroid.player;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
 import ro.ui.pttdroid.channels.Channel;
+import ro.ui.pttdroid.channels.GroupChannel;
 import ro.ui.pttdroid.channels.ListenOnlyChannel;
 import ro.ui.pttdroid.channels.NullChannel;
+import ro.ui.pttdroid.channels.PeerChannel;
 import ro.ui.pttdroid.codecs.Speex;
 import ro.ui.pttdroid.settings.AudioSettings;
 import ro.ui.pttdroid.util.AudioParams;
@@ -22,7 +22,7 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.util.Log;
 
-public class Player extends Thread {
+public class Player implements Runnable {
 		
 	private static final int SOCKET_TIMEOUT_MILLISEC = 1000;
 	
@@ -33,7 +33,6 @@ public class Player extends Thread {
 	private boolean isFinishing = false;
 	
 	private DatagramSocket socket;
-	private MulticastSocket multicastSocket;
 	private DatagramPacket packet;	
 	
 	private short[] pcmFrame = new short[AudioParams.FRAME_SIZE];
@@ -83,6 +82,20 @@ public class Player extends Thread {
 					if (trackMap.containsKey(sender)) {
 						track = trackMap.get(sender);
 					} else {
+						
+						// filter out packets from everyone but peer(s)
+						if (channel instanceof PeerChannel) {
+							if (!channel.addr.getHostAddress().equals(sender.getHostAddress())) {
+								break; // drop packet on floor
+							}
+						} else if (channel instanceof GroupChannel) {
+							GroupChannel groupChannel = (GroupChannel) channel;
+							if (!groupChannel.group.containsHostAddress(sender.getHostAddress())) {
+								break; // drop packet on floor
+							}
+						}
+						// ListenOnlyChannel doesn't filter
+						
 						int streamType;
 						if(AudioSettings.getSpeakerState() == AudioSettings.SPEAKER_OFF) {
 							streamType = AudioManager.STREAM_VOICE_CALL;
@@ -148,43 +161,8 @@ public class Player extends Thread {
 	
 	private void init() {	
 		try {			
-			/*
-			int streamType;
-			if(AudioSettings.getSpeakerState() == AudioSettings.SPEAKER_OFF) {
-				streamType = AudioManager.STREAM_VOICE_CALL;
-			} else {
-				streamType = AudioManager.STREAM_MUSIC;
-			}
-			
-			track = new AudioTrack(
-					streamType,
-					AudioParams.SAMPLE_RATE, 
-					AudioFormat.CHANNEL_CONFIGURATION_MONO, 
-					AudioParams.ENCODING_PCM_NUM_BITS, 
-					AudioParams.TRACK_BUFFER_SIZE, 
-					AudioTrack.MODE_STREAM);	
-			*/
-			
-			switch(channel.getCastType()) {
-				case Channel.BROADCAST:
-					socket = new DatagramSocket(channel.rxPort);
-					socket.setBroadcast(true);
-					break;
-				case Channel.MULTICAST:
-					multicastSocket = new MulticastSocket(channel.rxPort);
-					multicastSocket.joinGroup(channel.addr);
-					socket = multicastSocket;
-					break;
-				case Channel.UNICAST:
-					socket = new DatagramSocket(channel.rxPort);
-					
-					// TODO: filter out packets from everyone but peer
-					if (!(channel instanceof NullChannel) && !(channel instanceof ListenOnlyChannel)) {
-						socket.connect(channel.addr, Channel.DEFAULT_TX_PORT);
-					}
-					break;
-			}							
-			
+			socket = new DatagramSocket(channel.port);
+						
 			if(AudioSettings.useSpeex() == AudioSettings.USE_SPEEX) {
 				encodedFrame = new byte[Speex.getEncodedSize(AudioSettings.getSpeexQuality())];
 			} else { 
@@ -228,7 +206,6 @@ public class Player extends Thread {
 		
 	public synchronized void pauseAudio() {
 		isRunning = false;
-		leaveGroup();
 		if (socket != null) {
 			socket.close();
 		}
@@ -242,20 +219,5 @@ public class Player extends Thread {
 		pauseAudio();
 		isFinishing = true;
 		this.notify();
-	}
-	
-	private void leaveGroup() {
-		try {
-			if (multicastSocket != null) {
-				multicastSocket.leaveGroup(channel.addr);
-			}
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
-		catch(NullPointerException e) {
-			e.printStackTrace();
-		}		
-	}
-		
+	}	
 }

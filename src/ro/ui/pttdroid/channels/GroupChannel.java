@@ -24,11 +24,6 @@ public class GroupChannel extends Channel {
 	}
 
 	@Override
-	public int getCastType() {
-		return Channel.BROADCAST; // TODO
-	}
-
-	@Override
 	public boolean isRecorderEnabled() {
 		return true;
 	}

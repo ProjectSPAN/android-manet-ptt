@@ -21,4 +21,8 @@ public class Group {
 	public String toString() {
 		return name;
 	}
+	
+	public boolean containsHostAddress(String host) {
+		return peers.contains(host);
+	}
 }

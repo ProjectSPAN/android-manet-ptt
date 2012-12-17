@@ -52,11 +52,6 @@ public class PeerChannel extends Channel {
 	}
 
 	@Override
-	public int getCastType() {
-		return Channel.UNICAST;
-	}
-
-	@Override
 	public boolean isRecorderEnabled() {
 		return true;
 	}

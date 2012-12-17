@@ -13,11 +13,6 @@ public class NullChannel extends Channel {
 		}
 		return false;
 	}
-	
-	@Override
-	public int getCastType() {
-		return Channel.UNICAST;
-	}
 
 	@Override
 	public boolean isRecorderEnabled() {

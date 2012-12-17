@@ -5,10 +5,15 @@ import java.util.List;
 
 import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.channels.ChannelHelper;
+import ro.ui.pttdroid.channels.GroupChannel;
 import ro.ui.pttdroid.channels.ViewChannel;
 import ro.ui.pttdroid.codecs.Speex;
 import ro.ui.pttdroid.groups.GroupHelper;
 import ro.ui.pttdroid.groups.ViewGroups;
+import ro.ui.pttdroid.player.Player;
+import ro.ui.pttdroid.recorder.MultiRecorder;
+import ro.ui.pttdroid.recorder.Recorder;
+import ro.ui.pttdroid.recorder.SingleRecorder;
 import ro.ui.pttdroid.service.ConnectionService;
 import ro.ui.pttdroid.settings.AudioSettings;
 import ro.ui.pttdroid.settings.CommSettings;
@@ -71,10 +76,11 @@ public class Main extends Activity implements ManetObserver {
 	 * This threads are stopped only if isFinishing() returns true on onDestroy(), meaning the back button was pressed.
 	 * With other words, recorder and player threads will still be running if an screen orientation event occurs.
 	 */	
-	private static Player player;	
-	private static Recorder recorder;
+	private static Player player = null;	
+	private static Recorder recorder = null;
 	
-	private static WifiManager.MulticastLock multicastLock;
+	private static Thread playerThread = null;
+	private static Thread recorderThread = null;
 	
 	// Block recording when playing  something.
 	private static Handler handler = new Handler();
@@ -353,14 +359,15 @@ public class Main extends Activity implements ManetObserver {
     	 * This will be executed only once.
     	 */    	    	    	    	
     	if(isStarting) {
-        	WifiManager wm = (WifiManager)getSystemService(Context.WIFI_SERVICE);
-        	multicastLock = wm.createMulticastLock("PTT");
-        	multicastLock.acquire();
-    		
     		AudioSettings.getSettings(this); // TODO  	
         	
     		player = new Player(channel);    		    		     		    	
-    		recorder = new Recorder(channel);
+    		
+    		if (channel instanceof GroupChannel) {
+    			recorder = new MultiRecorder(channel);
+    		} else {
+    			recorder = new SingleRecorder(channel);    
+    		}
     		
     		// initial mic state
     		if (channel.isRecorderEnabled()) {
@@ -405,8 +412,14 @@ public class Main extends Activity implements ManetObserver {
     		handler.removeCallbacks(stateRunnable);
     		handler.postDelayed(stateRunnable, STATE_CHECK_PERIOD_MILLISEC);
     		
-    		player.start();
-    		recorder.start(); 
+    		// player.start();
+    		// recorder.start(); 
+    		
+    		playerThread = new Thread(player);
+    		playerThread.start();
+    		
+    		recorderThread = new Thread(recorder);
+    		recorderThread.start();
     		
     		isStarting = false;    		
     	}
@@ -414,8 +427,6 @@ public class Main extends Activity implements ManetObserver {
     
     private void pttRelease() {
     	if (isStarting == false) {
-	    	multicastLock.release();
-			
 			handler.removeCallbacks(stateRunnable);
 	
 			// Force threads to finish.
@@ -423,8 +434,11 @@ public class Main extends Activity implements ManetObserver {
 			recorder.finish();
 			
 			try {
-				player.join();
-				recorder.join();
+				// player.join();
+				// recorder.join();
+				
+				playerThread.join();
+				recorderThread.join();
 			}
 			catch(InterruptedException e) {
 				Log.d("PTT", e.toString());
