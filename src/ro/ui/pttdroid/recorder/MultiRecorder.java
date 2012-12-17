@@ -1,13 +1,10 @@
 package ro.ui.pttdroid.recorder;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 
 import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.channels.GroupChannel;
-import ro.ui.pttdroid.channels.PeerChannel;
 
 public class MultiRecorder extends Recorder {
 	
@@ -24,21 +21,12 @@ public class MultiRecorder extends Recorder {
 		
 		recorders = new HashSet<Recorder>();
 		
-		try {
-			InetAddress addr = null;
-			Channel channel = null;
-			Recorder recorder = null;
-			for(String peer : groupChannel.group.peers) {
-				addr = InetAddress.getByName(peer);
-				channel = new PeerChannel(peer, addr); // TODO
-				recorder = new SingleRecorder(channel);
-				recorder.init();
-				
-				recorders.add(recorder);
-			}
-		} catch(UnknownHostException e) {
-			e.printStackTrace();
-		}	
+		Recorder recorder = null;
+		for(Channel channel : groupChannel.channels) {
+			recorder = new SingleRecorder(channel);
+			recorder.init();
+			recorders.add(recorder);
+		}
 	}
 	
 	protected void release() {

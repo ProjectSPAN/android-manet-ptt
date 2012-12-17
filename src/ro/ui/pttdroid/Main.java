@@ -6,6 +6,7 @@ import java.util.List;
 import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.channels.ChannelHelper;
 import ro.ui.pttdroid.channels.GroupChannel;
+import ro.ui.pttdroid.channels.PeerChannel;
 import ro.ui.pttdroid.channels.ViewChannel;
 import ro.ui.pttdroid.codecs.Speex;
 import ro.ui.pttdroid.groups.GroupHelper;
@@ -251,12 +252,37 @@ public class Main extends Activity implements ManetObserver {
     private void checkChannels() {
  		channels = ChannelHelper.getChannels();
  		
- 		if (!channels.contains(channel)) {
- 			channels.add(channel); // add invalid channel back in for user awareness
- 			channel.setValid(false);
-			btnInfo.setImageResource(R.drawable.red_orb_icon);
+ 		if (channel instanceof PeerChannel) {
+ 			if (!channels.contains(channel)) {
+ 	 			channels.add(channel); // add invalid channel back in for user awareness
+ 	 			channel.setValid(false);
+ 				btnInfo.setImageResource(R.drawable.red_orb_icon);
+ 	 		} else {
+ 	 			channel.setValid(true);
+ 	 			btnInfo.setImageResource(R.drawable.green_orb_icon);
+ 	 		}
+ 		} else if (channel instanceof GroupChannel) {
+ 			// check if all, some, or none of the peers are available
+ 			GroupChannel groupChannel = (GroupChannel) channel;
+ 			int partCount = 0;
+ 			int fullCount = groupChannel.channels.size();
+ 			for (Channel channel : groupChannel.channels) {
+ 				if (channels.contains(channel)) {
+ 					partCount++;
+ 	 	 		} 
+ 			}
+ 			if (partCount == fullCount) { // all
+ 				channel.setValid(true);
+ 				btnInfo.setImageResource(R.drawable.green_orb_icon);
+ 			} else if (partCount == 0) { // none
+ 				channel.setValid(false);
+ 				btnInfo.setImageResource(R.drawable.red_orb_icon);
+ 			} else { // partial
+ 				channel.setValid(true);
+ 				btnInfo.setImageResource(R.drawable.orange_orb_icon);
+ 			}
  		} else {
- 			btnInfo.setImageResource(R.drawable.green_orb_icon); // TODO: orange?
+ 			btnInfo.setImageResource(R.drawable.green_orb_icon);
  		}
     }
     
