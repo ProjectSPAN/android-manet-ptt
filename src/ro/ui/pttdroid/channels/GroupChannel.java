@@ -5,7 +5,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import ro.ui.pttdroid.R;
 import ro.ui.pttdroid.groups.Group;
 
 public class GroupChannel extends Channel {

@@ -14,7 +14,6 @@ import android.app.ListActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -76,8 +75,7 @@ public class ViewChannel extends ListActivity implements ManetObserver {
  			myChannels.addAll(groupChannel.channels);
  		}
 		
-		ArrayAdapter<Channel> adapter = 
-				new ArrayAdapter<Channel>(this, android.R.layout.simple_list_item_1, myChannels);
+		ChannelAdapter adapter = new ChannelAdapter(this, myChannels);
 		mainListView.setAdapter(adapter);
  		mainListView.setItemsCanFocus(false);
  		mainListView.setChoiceMode(ListView.CHOICE_MODE_NONE); // TODO
