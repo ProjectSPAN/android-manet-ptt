@@ -3,15 +3,12 @@ package ro.ui.pttdroid.channels;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 import android.adhoc.manet.routing.Node;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.preference.PreferenceManager;
 
 import ro.ui.pttdroid.groups.Group;
@@ -29,11 +26,10 @@ public class ChannelHelper {
 	public static String CHANNEL_NULL = "Silence Mode";
 	public static String CHANNEL_LISTEN_ONLY = "Listen Only Mode";
 	
-	private static HashSet<Node> peers = null;
-	
 	private static Channel nullChannel = new NullChannel();
 	private static Channel listenOnlyChannel = new ListenOnlyChannel();
 	
+	private static List<Channel> channels = null;
 	private static Channel channel = null;
 	
 	private static SharedPreferences prefs = null;
@@ -100,10 +96,6 @@ public class ChannelHelper {
 		return channel;
 	}
 	
-	public static void updatePeers(HashSet<Node> _peers) {
-		peers = _peers;
-	}
-
 	public static Channel getDefaultChannel() {
 		return listenOnlyChannel;
 	}
@@ -117,8 +109,15 @@ public class ChannelHelper {
 	}
 	
 	public static List<Channel> getChannels() {
-		List<Channel> channels = new ArrayList<Channel>(); // TODO: sort alphabetically, groups before individuals
-		Channel channel = null;
+		if (channels == null) {
+			updateChannels(null);
+		}
+		return channels;
+	}
+	
+	public static void updateChannels(HashSet<Node> peers) {
+		Channel c = null;
+		channels = new ArrayList<Channel>(); // TODO: sort alphabetically, groups before individuals
 		
 		// special channels
 		channels.add(nullChannel);
@@ -127,18 +126,60 @@ public class ChannelHelper {
 		// groups
 		List<Group> groups = GroupHelper.getGroups();
 		for (Group group : groups) {
-			channel = new GroupChannel(group);
-			channels.add(channel);
+			c = new GroupChannel(group);
+			if (c.equals(channel)) {
+				// use current channel instance
+				channels.add(channel);
+			} else {
+				channels.add(c);
+			}
 		}
 		
 		// peers
 		if (peers != null) {
+			// NOTE: don't show individual peers that aren't in the mesh right now
 			for (Node peer : peers) {
-				channel = new PeerChannel(peer);
-				channels.add(channel);
+				c = new PeerChannel(peer);
+				if (c.equals(channel)) {
+					// use current channel instance
+					channel.setStatus(Channel.GOOD_STATUS);
+					channels.add(channel);
+				} else {
+					c.setStatus(Channel.GOOD_STATUS);
+					channels.add(c);
+				}
 			}
 		}
 		
-		return channels;
+		// current channel
+		if (!channels.contains(channel)) {
+ 			channels.add(channel); // add invalid channel back in for user awareness
+ 			channel.setStatus(Channel.BAD_STATUS);
+ 		}
+		
+		updateGroupChannelStatus();
 	}
+	
+	private static void updateGroupChannelStatus() {
+ 		for (Channel c : channels) {
+ 			if (c instanceof GroupChannel) {
+ 	 			// check if all, some, or none of the peers are available
+ 	 			GroupChannel groupChannel = (GroupChannel) c;
+ 	 			int partCount = 0;
+ 	 			int fullCount = groupChannel.channels.size();
+ 	 			for (Channel gc : groupChannel.channels) {
+ 	 				if (channels.contains(gc)) {
+ 	 					partCount++;
+ 	 	 	 		} 
+ 	 			}
+ 	 			if (partCount == fullCount) { // all
+ 	 				c.setStatus(Channel.GOOD_STATUS);
+ 	 			} else if (partCount == 0) { // none
+ 	 				c.setStatus(Channel.BAD_STATUS);
+ 	 			} else { // partial
+ 	 				c.setStatus(Channel.PARTIAL_STATUS);
+ 	 			}
+ 	 		}
+ 		}
+    }
 }

@@ -9,6 +9,10 @@ import android.preference.PreferenceManager;
 
 public abstract class Channel {
 	
+	public static final int GOOD_STATUS    = 0;
+	public static final int BAD_STATUS     = 1;
+	public static final int PARTIAL_STATUS = 2;
+	
 	public static final int BROADCAST = 0;
 	public static final int MULTICAST = 1;
 	public static final int UNICAST   = 2;
@@ -20,7 +24,7 @@ public abstract class Channel {
 	public int port = DEFAULT_PORT;
 	public InetAddress addr = null;
 	
-	public boolean valid = false;
+	public int status = BAD_STATUS;
 	
 	public Channel(String name) {
 		this.name = name;
@@ -38,8 +42,8 @@ public abstract class Channel {
 	
 	public abstract boolean isPlayerEnabled();
 	
-	public void setValid(boolean valid) {
-		this.valid = valid;
+	public void setStatus(int status) {
+		this.status = status;
 	}
 	
 	public void getSettings(Context context) {

@@ -4,7 +4,7 @@ public class NullChannel extends Channel {
 	
 	public NullChannel() {
 		super(ChannelHelper.CHANNEL_NULL);
-		setValid(true);
+		setStatus(Channel.GOOD_STATUS);
 	}
 
 	@Override

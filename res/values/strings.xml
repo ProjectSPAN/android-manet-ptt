@@ -51,6 +51,7 @@
     <string name="groups_view_name">View Groups</string>
     <string name="group_view_label">View Group</string>
     <string name="group_view_name">View Group</string>
+    <string name="channel_label">Channel Info</string>
     <string name="channel_view_name">View Channel</string>
     <string name="prompt_channel">Select a Mode, Group, or Peer</string>
 </resources>

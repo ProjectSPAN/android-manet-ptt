@@ -66,7 +66,9 @@ public class ViewChannel extends ListActivity implements ManetObserver {
         }
 	}
 	
-	private void showChannels() {
+	private void updateChannelList() {
+		channels = ChannelHelper.getChannels();
+		
 		List<Channel> myChannels = new ArrayList<Channel>();
 		if (channel instanceof PeerChannel) {
  			myChannels.add(channel);
@@ -79,31 +81,6 @@ public class ViewChannel extends ListActivity implements ManetObserver {
 		mainListView.setAdapter(adapter);
  		mainListView.setItemsCanFocus(false);
  		mainListView.setChoiceMode(ListView.CHOICE_MODE_NONE); // TODO
-	}
-	
-	private void checkChannels() {
-		channels = ChannelHelper.getChannels();
-		showChannels();
-		
-		/*
-		if (channel instanceof PeerChannel) {
- 			if (!channels.contains(channel)) {
- 				// btnInfo.setImageResource(R.drawable.red_orb_icon);
- 	 		} else {
- 	 			// btnInfo.setImageResource(R.drawable.green_orb_icon);
- 	 		}
- 		} else if (channel instanceof GroupChannel) {
- 			// check if all, some, or none of the peers are available
- 			GroupChannel groupChannel = (GroupChannel) channel;
- 			for (Channel channel : groupChannel.channels) {
- 				if (channels.contains(channel)) {
- 					// TODO
- 	 	 		} 
- 			}
- 		} else {
- 			// TODO
- 		}
- 		*/
 	}
 
 	public void onServiceConnected() {
@@ -135,8 +112,8 @@ public class ViewChannel extends ListActivity implements ManetObserver {
 	}
 
 	public void onPeersUpdated(HashSet<Node> peers) {
-		ChannelHelper.updatePeers(peers);
-		checkChannels();
+		ChannelHelper.updateChannels(peers);
+		updateChannelList();
 	}
 
 	public void onError(String error) {

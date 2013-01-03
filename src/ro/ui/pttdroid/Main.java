@@ -8,7 +8,6 @@ import ro.ui.pttdroid.channels.ChannelHelper;
 import ro.ui.pttdroid.channels.GroupChannel;
 import ro.ui.pttdroid.channels.ListenOnlyChannel;
 import ro.ui.pttdroid.channels.NullChannel;
-import ro.ui.pttdroid.channels.PeerChannel;
 import ro.ui.pttdroid.channels.ViewChannel;
 import ro.ui.pttdroid.codecs.Speex;
 import ro.ui.pttdroid.groups.GroupHelper;
@@ -107,7 +106,6 @@ public class Main extends Activity implements ManetObserver {
 				if (!selection.equals(channel)) {
 					channel = selection;
 					ChannelHelper.setChannel(channel);
-					checkChannels();
 					pttReset();
 				}
 			}
@@ -117,6 +115,7 @@ public class Main extends Activity implements ManetObserver {
 			}
     	});
     	
+    	/*
     	spnChannel.setOnTouchListener(new OnTouchListener() {
     		public boolean onTouch(View view, MotionEvent event) {	
 	    		switch(event.getAction()) {
@@ -129,19 +128,12 @@ public class Main extends Activity implements ManetObserver {
 		    	return false; // don't consume event so that spinner behaves normally 
 			}
     	});
+    	*/
     	
     	btnInfo = (ImageButton) findViewById(R.id.btnInfo);
     	btnInfo.setOnClickListener(new View.OnClickListener() {
 	  		public void onClick(View v) {
-	  			Channel channel = ChannelHelper.getChannel();
-	  			if (channel instanceof NullChannel) {
-	  				openDialog("Silence Mode", "Will not play or transmit audio.");
-	  			} else if (channel instanceof ListenOnlyChannel) {
-	  				openDialog("Listen Only Mode", "Will play audio received by any peer. Will not transmit audio.");
-	  			} else {
-	  				Intent i = new Intent(Main.this, ViewChannel.class);
-		    		startActivityForResult(i, 0);
-	  			}
+	  			viewChannel();
 	  		}
 		});
     	
@@ -252,50 +244,15 @@ public class Main extends Activity implements ManetObserver {
 	    		i = new Intent(this, ViewGroups.class);
 	    		startActivityForResult(i, 0);
 	    		return true;
+	    	case R.id.channel:
+	    		viewChannel();
 	    	default:
 	    		return super.onOptionsItemSelected(item);
     	}
     }
-    
-    private void checkChannels() {
- 		channels = ChannelHelper.getChannels();
- 		
- 		if (channel instanceof PeerChannel) {
- 			if (!channels.contains(channel)) {
- 	 			channels.add(channel); // add invalid channel back in for user awareness
- 	 			channel.setValid(false);
- 				btnInfo.setImageResource(R.drawable.red_orb_icon);
- 	 		} else {
- 	 			channel.setValid(true);
- 	 			btnInfo.setImageResource(R.drawable.green_orb_icon);
- 	 		}
- 		} else if (channel instanceof GroupChannel) {
- 			// check if all, some, or none of the peers are available
- 			GroupChannel groupChannel = (GroupChannel) channel;
- 			int partCount = 0;
- 			int fullCount = groupChannel.channels.size();
- 			for (Channel channel : groupChannel.channels) {
- 				if (channels.contains(channel)) {
- 					partCount++;
- 	 	 		} 
- 			}
- 			if (partCount == fullCount) { // all
- 				channel.setValid(true);
- 				btnInfo.setImageResource(R.drawable.green_orb_icon);
- 			} else if (partCount == 0) { // none
- 				channel.setValid(false);
- 				btnInfo.setImageResource(R.drawable.red_orb_icon);
- 			} else { // partial
- 				channel.setValid(true);
- 				btnInfo.setImageResource(R.drawable.orange_orb_icon);
- 			}
- 		} else {
- 			btnInfo.setImageResource(R.drawable.green_orb_icon);
- 		}
-    }
-    
+        
     private void updateChannelList() {
-    	checkChannels();
+    	channels = ChannelHelper.getChannels();
  		
 		ArrayAdapter<Channel> adapter = 
 				new ArrayAdapter<Channel>(this, android.R.layout.simple_spinner_item, channels);
@@ -310,6 +267,26 @@ public class Main extends Activity implements ManetObserver {
 		}
 		int index = adapter.getPosition(channel);
 		spnChannel.setSelection(index);
+		
+    	updateChannelStatus();
+    }
+    
+    private void updateChannelStatus() {    	
+ 		// set channel status icon
+		switch (channel.status) {
+			case Channel.GOOD_STATUS:
+				btnInfo.setImageResource(R.drawable.green_orb_icon);
+				break;
+			case Channel.PARTIAL_STATUS:
+				btnInfo.setImageResource(R.drawable.orange_orb_icon);
+				break;
+			case Channel.BAD_STATUS:
+				btnInfo.setImageResource(R.drawable.red_orb_icon);
+				break;
+			default:
+				btnInfo.setImageResource(R.drawable.red_orb_icon);
+				break;
+		}
     }
     
     /**
@@ -485,6 +462,18 @@ public class Main extends Activity implements ManetObserver {
     	}
     }
     
+    private void viewChannel() {
+    	Channel channel = ChannelHelper.getChannel();
+		if (channel instanceof NullChannel) {
+			openDialog("Silence Mode", "Will not play or transmit audio.");
+		} else if (channel instanceof ListenOnlyChannel) {
+			openDialog("Listen Only Mode", "Will play audio received by any peer. Will not transmit audio.");
+		} else {
+			Intent i = new Intent(Main.this, ViewChannel.class);
+			startActivityForResult(i, 0);
+		}
+    }
+    
 	private void openDialog(String title, String message) {
 		new AlertDialog.Builder(this)
         	.setTitle(title)
@@ -536,8 +525,8 @@ public class Main extends Activity implements ManetObserver {
 	}
 
 	public void onPeersUpdated(HashSet<Node> peers) {
-		ChannelHelper.updatePeers(peers);
-		checkChannels();
+		ChannelHelper.updateChannels(peers);
+		updateChannelList();
 	}
 
 	public void onError(String error) {
