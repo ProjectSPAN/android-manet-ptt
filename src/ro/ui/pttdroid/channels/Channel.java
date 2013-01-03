@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
 
-public abstract class Channel {
+public abstract class Channel implements Comparable<Channel> {
 	
 	public static final int GOOD_STATUS    = 0;
 	public static final int BAD_STATUS     = 1;
@@ -37,6 +37,10 @@ public abstract class Channel {
 	
 	@Override
 	public abstract boolean equals(Object other);
+	
+	public int compareTo(Channel other) {
+		return name.compareTo(other.name);
+	}
 	
 	public abstract boolean isRecorderEnabled();
 	

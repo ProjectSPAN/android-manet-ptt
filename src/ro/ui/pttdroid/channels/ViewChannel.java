@@ -24,7 +24,6 @@ public class ViewChannel extends ListActivity implements ManetObserver {
 	private ManetHelper manet = null;
 	
 	private Channel channel = null;
-	private List<Channel> channels = null;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -66,9 +65,7 @@ public class ViewChannel extends ListActivity implements ManetObserver {
         }
 	}
 	
-	private void updateChannelList() {
-		channels = ChannelHelper.getChannels();
-		
+	private void updateChannelList() {		
 		List<Channel> myChannels = new ArrayList<Channel>();
 		if (channel instanceof PeerChannel) {
  			myChannels.add(channel);

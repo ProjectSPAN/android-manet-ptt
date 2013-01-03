@@ -3,6 +3,7 @@ package ro.ui.pttdroid.channels;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -52,7 +53,32 @@ public class ChannelHelper {
 		if (channels == null) {
 			updateChannels(null);
 		}
-		return new ArrayList<Channel>(channels);
+		
+		// order channels
+		List<Channel> ordered 	= new ArrayList<Channel>();
+		List<Channel> modes 	= new ArrayList<Channel>();
+		List<Channel> peers 	= new ArrayList<Channel>();
+		List<Channel> groups 	= new ArrayList<Channel>();
+		
+		for (Channel c : channels) {
+			if (c instanceof PeerChannel) {
+				peers.add(c);
+			} else if (c instanceof GroupChannel) {
+				groups.add(c);
+			} else {
+				modes.add(c);
+			}
+		}
+		
+		Collections.sort(modes);
+		Collections.sort(groups);
+		Collections.sort(peers);
+		
+		ordered.addAll(modes);
+		ordered.addAll(groups);
+		ordered.addAll(peers);
+		
+		return ordered;
 	}
 	
 	// TODO: check if channel exists before instantiating a new one
