@@ -2,9 +2,9 @@ package ro.ui.pttdroid.channels;
 
 public class ListenOnlyChannel extends Channel {
 	
-	public ListenOnlyChannel () {
+	// NOTE: should only be invoked by ChannelHelper
+	protected ListenOnlyChannel () {
 		super(ChannelHelper.CHANNEL_LISTEN_ONLY);
-		setStatus(Channel.GOOD_STATUS);
 	}
 
 	@Override

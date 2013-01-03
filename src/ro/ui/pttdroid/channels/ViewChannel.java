@@ -81,8 +81,8 @@ public class ViewChannel extends ListActivity implements ManetObserver {
 		mainListView.setAdapter(adapter);
  		mainListView.setItemsCanFocus(false);
  		mainListView.setChoiceMode(ListView.CHOICE_MODE_NONE); // TODO
-	}
-
+	}	
+	
 	public void onServiceConnected() {
 		manet.sendPeersQuery();
 	}

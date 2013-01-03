@@ -105,7 +105,7 @@ public class Main extends Activity implements ManetObserver {
 				Channel selection = (Channel) spnChannel.getAdapter().getItem(position);
 				if (!selection.equals(channel)) {
 					channel = selection;
-					ChannelHelper.setChannel(channel);
+					ChannelHelper.setCurrentChannel(channel);
 					pttReset();
 				}
 			}

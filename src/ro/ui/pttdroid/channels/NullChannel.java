@@ -2,9 +2,9 @@ package ro.ui.pttdroid.channels;
 
 public class NullChannel extends Channel {
 	
-	public NullChannel() {
+	// NOTE: should only be invoked by ChannelHelper
+	protected NullChannel() {
 		super(ChannelHelper.CHANNEL_NULL);
-		setStatus(Channel.GOOD_STATUS);
 	}
 
 	@Override

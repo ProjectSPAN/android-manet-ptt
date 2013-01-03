@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 
 import ro.ui.pttdroid.groups.Group;
 import ro.ui.pttdroid.groups.GroupHelper;
+import ro.ui.pttdroid.settings.CommSettings;
 
 public class ChannelHelper {
 	
@@ -26,10 +27,10 @@ public class ChannelHelper {
 	public static String CHANNEL_NULL = "Silence Mode";
 	public static String CHANNEL_LISTEN_ONLY = "Listen Only Mode";
 	
-	private static Channel nullChannel = new NullChannel();
-	private static Channel listenOnlyChannel = new ListenOnlyChannel();
+	private static Channel nullChannel = null;;
+	private static Channel listenOnlyChannel = null;
 	
-	private static List<Channel> channels = null;
+	private static List<Channel> channels = new ArrayList<Channel>(); // maintain insertion order
 	private static Channel channel = null;
 	
 	private static SharedPreferences prefs = null;
@@ -39,6 +40,108 @@ public class ChannelHelper {
 		loadChannel();
 	}
 	
+	public static Channel getChannel() {
+		return channel;
+	}
+	
+	public static Channel getDefaultChannel() {
+		return getListenOnlyChannel();
+	}
+	
+	public static List<Channel> getChannels() {
+		if (channels == null) {
+			updateChannels(null);
+		}
+		return new ArrayList<Channel>(channels);
+	}
+	
+	// TODO: check if channel exists before instantiating a new one
+	private static Channel getChannel(Channel c) {
+		Channel retval = null;
+		if (channels.contains(c)) {
+			// use existing channel instance
+			retval = channels.get(channels.indexOf(c));
+		} else {
+			// use new channel instance
+			channels.add(c);
+			retval = c;
+		}
+		return retval;
+	}
+	
+	public static Channel getNullChannel() {
+		if (nullChannel == null) {
+			nullChannel = new NullChannel();
+		}
+		return getChannel(nullChannel);
+	}
+	
+	public static Channel getListenOnlyChannel() {
+		if (listenOnlyChannel == null) {
+			listenOnlyChannel = new ListenOnlyChannel();
+		}
+		return getChannel(listenOnlyChannel);
+	}
+	
+	public static Channel getPeerChannel(Node peer) {
+		Channel retval = null;
+		
+		try {
+			// TODO: DEBUG VPN
+			if (CommSettings.getVpnState()) {
+				String octets[] = peer.addr.split("\\.");
+				peer.addr = "2.2.2." + octets[3];
+			}
+			
+			String name = null;
+			if (peer.userId != null) {
+				name = peer.addr + " (" + peer.userId + ")";
+			} else {
+				name = peer.addr;	
+			}
+			
+			InetAddress addr = InetAddress.getByName(peer.addr);
+			
+			retval = getPeerChannel(name, addr);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
+		return retval;
+	}
+	
+	public static Channel getPeerChannel(String peer) {
+		Channel retval = null;
+		
+		try {
+			InetAddress addr = InetAddress.getByName(peer);
+			retval = getPeerChannel(peer, addr);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
+		return retval;
+	}
+	
+	public static Channel getPeerChannel(String name, InetAddress addr) {
+		Channel c = new PeerChannel(name, addr);
+		return getChannel(c);
+	}
+	
+	public static Channel getGroupChannel(Group group) {
+		
+		// peer channels
+		List<Channel> l = new ArrayList<Channel>();
+		Channel c = null;
+		for(String peer : group.peers) {
+			c = getPeerChannel(peer);
+			l.add(c);
+		}
+		
+		Channel gc = new GroupChannel(group, l);
+		return getChannel(gc);
+	}
+	
 	private static void loadChannel() {
 		if (prefs.contains(CHANNEL_NAME)) {
 			String name = prefs.getString(CHANNEL_NAME, "");
@@ -46,17 +149,17 @@ public class ChannelHelper {
 
 			try {
 				if (type.equals(NullChannel.class.getName())) {
-					channel = nullChannel;
+					channel = getNullChannel();
 				} else if (type.equals(ListenOnlyChannel.class.getName())) {
-					channel = listenOnlyChannel;
+					channel = getListenOnlyChannel();
 				} else if (type.equals(PeerChannel.class.getName())) {
 					String addr = prefs.getString(CHANNEL_ADDR, "");
 					InetAddress inetAddr = InetAddress.getByName(addr);
-					channel = new PeerChannel(name, inetAddr); // TODO
+					channel = getPeerChannel(name, inetAddr);
 				} else if (type.equals(GroupChannel.class.getName())) {
 					int id = prefs.getInt(CHANNEL_ID, -1);
 					Group group = GroupHelper.getGroup(id);
-					channel = new GroupChannel(group); // TODO
+					channel = getGroupChannel(group);
 				}
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
@@ -66,7 +169,7 @@ public class ChannelHelper {
 		}
 	}
 	
-	public static void setChannel(Channel _channel) {
+	public static void setCurrentChannel(Channel _channel) {
 		channel = _channel;
 		
 		SharedPreferences.Editor prefEditor = prefs.edit();
@@ -92,75 +195,39 @@ public class ChannelHelper {
 		prefEditor.commit();
 	}
 	
-	public static Channel getChannel() {
-		return channel;
-	}
-	
-	public static Channel getDefaultChannel() {
-		return listenOnlyChannel;
-	}
-	
-	public static Channel getNullChannel() {
-		return nullChannel;
-	}
-	
-	public static Channel getListenOnlyChannel() {
-		return listenOnlyChannel;
-	}
-	
-	public static List<Channel> getChannels() {
-		if (channels == null) {
-			updateChannels(null);
-		}
-		return channels;
-	}
-	
 	public static void updateChannels(HashSet<Node> peers) {
+		// clear channel statuses
+		for (Channel c : channels) {
+			c.setStatus(Channel.BAD_STATUS);
+		}
+		
 		Channel c = null;
-		channels = new ArrayList<Channel>(); // TODO: sort alphabetically, groups before individuals
 		
 		// special channels
-		channels.add(nullChannel);
-		channels.add(listenOnlyChannel);
+		c = getNullChannel();
+		c.setStatus(Channel.GOOD_STATUS);
+		
+		c = getListenOnlyChannel();
+		c.setStatus(Channel.GOOD_STATUS);
 		
 		// groups
 		List<Group> groups = GroupHelper.getGroups();
 		for (Group group : groups) {
-			c = new GroupChannel(group);
-			if (c.equals(channel)) {
-				// use current channel instance
-				channels.add(channel);
-			} else {
-				channels.add(c);
-			}
+			c = getGroupChannel(group);
 		}
 		
 		// peers
 		if (peers != null) {
-			// NOTE: don't show individual peers that aren't in the mesh right now
 			for (Node peer : peers) {
-				c = new PeerChannel(peer);
-				if (c.equals(channel)) {
-					// use current channel instance
-					channel.setStatus(Channel.GOOD_STATUS);
-					channels.add(channel);
-				} else {
-					c.setStatus(Channel.GOOD_STATUS);
-					channels.add(c);
-				}
+				c = getPeerChannel(peer);
+				c.setStatus(Channel.GOOD_STATUS);
 			}
 		}
-		
-		// current channel
-		if (!channels.contains(channel)) {
- 			channels.add(channel); // add invalid channel back in for user awareness
- 			channel.setStatus(Channel.BAD_STATUS);
- 		}
-		
-		updateGroupChannelStatus();
+				
+		updateGroupChannelStatuses();
 	}
 	
-	private static void updateGroupChannelStatus() {
+	private static void updateGroupChannelStatuses() {
  		for (Channel c : channels) {
  			if (c instanceof GroupChannel) {
  	 			// check if all, some, or none of the peers are available
