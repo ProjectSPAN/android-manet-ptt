@@ -4,6 +4,7 @@ public class ListenOnlyChannel extends Channel {
 	
 	public ListenOnlyChannel () {
 		super(ChannelHelper.CHANNEL_LISTEN_ONLY);
+		setValid(true);
 	}
 
 	@Override

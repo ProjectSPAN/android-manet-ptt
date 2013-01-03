@@ -26,8 +26,8 @@ public class ChannelHelper {
 	public static final String CHANNEL_ADDR  = "channel_addr";
 	public static final String CHANNEL_ID    = "channel_id"; // for group channels only
 	
-	public static String CHANNEL_NULL = "Silence";
-	public static String CHANNEL_LISTEN_ONLY = "Listen All";
+	public static String CHANNEL_NULL = "Silence Mode";
+	public static String CHANNEL_LISTEN_ONLY = "Listen Only Mode";
 	
 	private static HashSet<Node> peers = null;
 	

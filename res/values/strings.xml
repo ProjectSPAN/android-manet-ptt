@@ -4,7 +4,7 @@
     <string name="app_name">pttdroid</string>
     <string name="settings_name">pttdroid Settings</string>
     <string name="settings_label">Settings</string>
-    <string name="settings_comm_name">Communication settings</string>
+    <string name="settings_comm_name">Communication Settings</string>
     <string name="settings_comm_label">Communication</string>
     <string name="set_cast_and_port">Cast &amp; port</string>
     <string name="cast_type_title">Cast type</string>
@@ -22,7 +22,7 @@
     <string name="unicast_addr_title">Unicast address</string>
     <string name="unicast_addr_summary">Audio data will be received only by one device, designated by the given address.</string>
     <string name="unicast_addr_default">192.168.0.1</string>
-    <string name="settings_audio_name">Audio settings</string>
+    <string name="settings_audio_name">Audio Settings</string>
     <string name="settings_audio_label">Audio</string>
     <string name="use_speex_title">Use codec</string>
     <string name="use_speex_on">Codec on</string>
@@ -52,5 +52,5 @@
     <string name="group_view_label">View Group</string>
     <string name="group_view_name">View Group</string>
     <string name="channel_view_name">View Channel</string>
-    <string name="prompt_channel">Select a group or peer</string>
+    <string name="prompt_channel">Select a Mode, Group, or Peer</string>
 </resources>

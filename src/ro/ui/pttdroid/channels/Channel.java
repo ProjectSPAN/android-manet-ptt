@@ -20,7 +20,7 @@ public abstract class Channel {
 	public int port = DEFAULT_PORT;
 	public InetAddress addr = null;
 	
-	public boolean valid = true;
+	public boolean valid = false;
 	
 	public Channel(String name) {
 		this.name = name;

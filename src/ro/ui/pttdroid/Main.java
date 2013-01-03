@@ -6,6 +6,8 @@ import java.util.List;
 import ro.ui.pttdroid.channels.Channel;
 import ro.ui.pttdroid.channels.ChannelHelper;
 import ro.ui.pttdroid.channels.GroupChannel;
+import ro.ui.pttdroid.channels.ListenOnlyChannel;
+import ro.ui.pttdroid.channels.NullChannel;
 import ro.ui.pttdroid.channels.PeerChannel;
 import ro.ui.pttdroid.channels.ViewChannel;
 import ro.ui.pttdroid.codecs.Speex;
@@ -24,6 +26,8 @@ import android.adhoc.manet.routing.Node;
 import android.adhoc.manet.service.ManetService.AdhocStateEnum;
 import android.adhoc.manet.system.ManetConfig;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -129,9 +133,15 @@ public class Main extends Activity implements ManetObserver {
     	btnInfo = (ImageButton) findViewById(R.id.btnInfo);
     	btnInfo.setOnClickListener(new View.OnClickListener() {
 	  		public void onClick(View v) {
-	    		Intent i = new Intent(Main.this, ViewChannel.class);
-				// i.putExtra(GroupHelper.CHANNEL_INDEX, (int)index); // TODO
-	    		startActivityForResult(i, 0);
+	  			Channel channel = ChannelHelper.getChannel();
+	  			if (channel instanceof NullChannel) {
+	  				openDialog("Silence Mode", "Will not play or transmit audio.");
+	  			} else if (channel instanceof ListenOnlyChannel) {
+	  				openDialog("Listen Only Mode", "Will play audio received by any peer. Will not transmit audio.");
+	  			} else {
+	  				Intent i = new Intent(Main.this, ViewChannel.class);
+		    		startActivityForResult(i, 0);
+	  			}
 	  		}
 		});
     	
@@ -475,6 +485,17 @@ public class Main extends Activity implements ManetObserver {
     	}
     }
     
+	private void openDialog(String title, String message) {
+		new AlertDialog.Builder(this)
+        	.setTitle(title)
+        	.setMessage(message)
+        	.setNeutralButton("Okay", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                	// nothing to do
+                }
+        	})
+        	.show();  		
+   	}
 
 	public void onServiceConnected() {
 		// Update channel list
