@@ -46,21 +46,9 @@ public class ChannelAdapter extends BaseAdapter {
         tvName.setText(channel.name);
         
  		// set channel status icon
-        ImageButton btnInfo = (ImageButton) convertView.findViewById(R.id.btnInfo);            
-		switch (channel.status) {
-			case Channel.GOOD_STATUS:
-				btnInfo.setImageResource(R.drawable.green_orb_icon);
-				break;
-			case Channel.PARTIAL_STATUS:
-				btnInfo.setImageResource(R.drawable.orange_orb_icon);
-				break;
-			case Channel.BAD_STATUS:
-				btnInfo.setImageResource(R.drawable.red_orb_icon);
-				break;
-			default:
-				btnInfo.setImageResource(R.drawable.red_orb_icon);
-				break;
-		}
+        ImageButton btnInfo = (ImageButton) convertView.findViewById(R.id.btnInfo);            	
+    	int resource = ChannelHelper.getChannelStatusResource(channel);
+    	btnInfo.setImageResource(resource);
 
         return convertView;
     }

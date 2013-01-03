@@ -9,8 +9,7 @@
     	android:layout_height="wrap_content"
     	android:gravity="center_vertical"
     	android:minHeight="?android:attr/listPreferredItemHeight"
-    	android:background="@android:color/transparent"
-     	android:src="@drawable/red_orb_icon" />
+    	android:background="@android:color/transparent" />
     
     <include layout="@layout/simpletextitem"
         android:id="@+id/tvName"

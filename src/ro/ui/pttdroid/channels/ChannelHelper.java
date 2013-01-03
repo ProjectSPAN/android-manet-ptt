@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import ro.ui.pttdroid.R;
 import ro.ui.pttdroid.groups.Group;
 import ro.ui.pttdroid.groups.GroupHelper;
 import ro.ui.pttdroid.settings.CommSettings;
@@ -236,18 +237,19 @@ public class ChannelHelper {
 		c = getListenOnlyChannel();
 		c.setStatus(Channel.GOOD_STATUS);
 		
-		// groups
-		List<Group> groups = GroupHelper.getGroups();
-		for (Group group : groups) {
-			c = getGroupChannel(group);
-		}
-		
 		// peers
+		// NOTE: always update peer channels before group channels
 		if (peers != null) {
 			for (Node peer : peers) {
 				c = getPeerChannel(peer);
 				c.setStatus(Channel.GOOD_STATUS);
 			}
+		}
+		
+		// groups
+		List<Group> groups = GroupHelper.getGroups();
+		for (Group group : groups) {
+			c = getGroupChannel(group);
 		}
 				
 		updateGroupChannelStatuses();
@@ -261,7 +263,7 @@ public class ChannelHelper {
  	 			int partCount = 0;
  	 			int fullCount = groupChannel.channels.size();
  	 			for (Channel gc : groupChannel.channels) {
- 	 				if (channels.contains(gc)) {
+ 	 				if (gc.status == Channel.GOOD_STATUS) {
  	 					partCount++;
  	 	 	 		} 
  	 			}
@@ -274,5 +276,43 @@ public class ChannelHelper {
  	 			}
  	 		}
  		}
+    }
+	
+    public static int getChannelStatusResource(Channel _channel) {    	
+ 		int resource = -1;
+ 		if (_channel instanceof NullChannel) {
+ 			resource = R.drawable.stop_icon;
+ 		} 
+ 		else if (_channel instanceof ListenOnlyChannel) {
+ 			resource = R.drawable.eye_icon;
+ 		}
+ 		else if (_channel instanceof PeerChannel) {
+ 			switch (_channel.status) {
+				case Channel.GOOD_STATUS:
+					resource = R.drawable.peer_green_icon;
+					break;
+				case Channel.BAD_STATUS:
+					// fall through
+				default:
+					resource = R.drawable.peer_red_icon;
+					break;
+ 			}
+		} 
+ 		else if (_channel instanceof GroupChannel) {
+ 			switch (_channel.status) {
+				case Channel.GOOD_STATUS:
+					resource = R.drawable.group_green_icon;
+					break;
+				case Channel.PARTIAL_STATUS:
+					resource = R.drawable.group_orange_icon;
+					break;
+				case Channel.BAD_STATUS:
+					// fall through
+				default:
+					resource = R.drawable.group_red_icon;
+					break;
+ 			}
+		}
+		return resource;
     }
 }

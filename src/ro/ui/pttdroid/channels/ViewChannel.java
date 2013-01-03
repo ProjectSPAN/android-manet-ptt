@@ -20,6 +20,7 @@ import android.widget.AdapterView.OnItemClickListener;
 public class ViewChannel extends ListActivity implements ManetObserver {
 	
 	private ListView mainListView = null;
+	private ChannelAdapter adapter = null;
 	
 	private ManetHelper manet = null;
 	
@@ -74,10 +75,12 @@ public class ViewChannel extends ListActivity implements ManetObserver {
  			myChannels.addAll(groupChannel.channels);
  		}
 		
-		ChannelAdapter adapter = new ChannelAdapter(this, myChannels);
+		adapter = new ChannelAdapter(this, myChannels);
 		mainListView.setAdapter(adapter);
  		mainListView.setItemsCanFocus(false);
  		mainListView.setChoiceMode(ListView.CHOICE_MODE_NONE); // TODO
+ 		
+ 		adapter.notifyDataSetChanged(); // force redraw
 	}	
 	
 	public void onServiceConnected() {

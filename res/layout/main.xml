@@ -13,8 +13,7 @@
         <ImageButton android:id="@+id/btnInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:src="@drawable/red_orb_icon" />
+            android:background="@android:color/transparent" />
         
         <Spinner android:id="@+id/spnChannel"
             android:layout_width="wrap_content"

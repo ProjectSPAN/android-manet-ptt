@@ -106,6 +106,7 @@ public class Main extends Activity implements ManetObserver {
 				if (!selection.equals(channel)) {
 					channel = selection;
 					ChannelHelper.setCurrentChannel(channel);
+					updateChannelStatus();
 					pttReset();
 				}
 			}
@@ -272,21 +273,8 @@ public class Main extends Activity implements ManetObserver {
     }
     
     private void updateChannelStatus() {    	
- 		// set channel status icon
-		switch (channel.status) {
-			case Channel.GOOD_STATUS:
-				btnInfo.setImageResource(R.drawable.green_orb_icon);
-				break;
-			case Channel.PARTIAL_STATUS:
-				btnInfo.setImageResource(R.drawable.orange_orb_icon);
-				break;
-			case Channel.BAD_STATUS:
-				btnInfo.setImageResource(R.drawable.red_orb_icon);
-				break;
-			default:
-				btnInfo.setImageResource(R.drawable.red_orb_icon);
-				break;
-		}
+		int resource = ChannelHelper.getChannelStatusResource(channel);
+		btnInfo.setImageResource(resource);
     }
     
     /**
