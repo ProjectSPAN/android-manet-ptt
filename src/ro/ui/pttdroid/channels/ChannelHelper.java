@@ -56,7 +56,7 @@ public class ChannelHelper {
 	}
 	
 	// TODO: check if channel exists before instantiating a new one
-	private static Channel getChannel(Channel c) {
+	private static Channel addChannel(Channel c) {
 		Channel retval = null;
 		if (channels.contains(c)) {
 			// use existing channel instance
@@ -73,14 +73,14 @@ public class ChannelHelper {
 		if (nullChannel == null) {
 			nullChannel = new NullChannel();
 		}
-		return getChannel(nullChannel);
+		return addChannel(nullChannel);
 	}
 	
 	public static Channel getListenOnlyChannel() {
 		if (listenOnlyChannel == null) {
 			listenOnlyChannel = new ListenOnlyChannel();
 		}
-		return getChannel(listenOnlyChannel);
+		return addChannel(listenOnlyChannel);
 	}
 	
 	public static Channel getPeerChannel(Node peer) {
@@ -125,7 +125,7 @@ public class ChannelHelper {
 	
 	public static Channel getPeerChannel(String name, InetAddress addr) {
 		Channel c = new PeerChannel(name, addr);
-		return getChannel(c);
+		return addChannel(c);
 	}
 	
 	public static Channel getGroupChannel(Group group) {
@@ -139,7 +139,7 @@ public class ChannelHelper {
 		}
 		
 		Channel gc = new GroupChannel(group, l);
-		return getChannel(gc);
+		return addChannel(gc);
 	}
 	
 	private static void loadChannel() {
