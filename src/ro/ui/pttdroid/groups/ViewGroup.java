@@ -48,7 +48,7 @@ public class ViewGroup extends ListActivity {
  		group.peers.toArray(peers);
  		
  		mainListView.setAdapter(new ArrayAdapter<String>(this,
- 				android.R.layout.simple_list_item_1, peers));
+ 				R.layout.simpletextitem, peers));
 
  		mainListView.setItemsCanFocus(false);
  		mainListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
