@@ -49,7 +49,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class Main extends Activity implements ManetObserver {
+public class Main extends PeersQueryActivity {
 	
 	public static final int MIC_STATE_NORMAL   = 0;
 	public static final int MIC_STATE_PRESSED  = 1;
@@ -71,8 +71,6 @@ public class Main extends Activity implements ManetObserver {
 	private List<Channel> channels = null;
 	private Channel channel = null;
 	
-	private ManetHelper manet = null;
-	
 	/*
 	 * Threads for recording and playing audio data.
 	 * This threads are stopped only if isFinishing() returns true on onDestroy(), meaning the back button was pressed.
@@ -89,9 +87,6 @@ public class Main extends Activity implements ManetObserver {
 	private static Runnable stateRunnable;
 	private static int storedProgress = 0;	
 	private static final int STATE_CHECK_PERIOD_MILLISEC = 100;
-	
-	private static Runnable channelRunnable;
-	private static final int CHANNEL_CHECK_PERIOD_MILLISEC = 5000;
 		
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -170,22 +165,10 @@ public class Main extends Activity implements ManetObserver {
     	
     	channel = ChannelHelper.getChannel(); // TODO
     	
-		manet = new ManetHelper(this);
-	    manet.registerObserver(this);
-    	
    		// start service so that it runs even if no active activities are bound to it
    		startService(new Intent(this, ConnectionService.class));
 		
         pttInit();
-    }
-    
-    @Override
-    public void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        
-        if (!manet.isConnectedToService()) {
-			manet.connectToService();
-        }
     }
     
     @Override
@@ -210,13 +193,6 @@ public class Main extends Activity implements ManetObserver {
     @Override
     public void onDestroy() {
     	super.onDestroy();
-    	
-		manet.unregisterObserver(this);
-		
-        if (manet.isConnectedToService()) {
-			manet.disconnectFromService();
-        }
-    	
     	pttRelease();    	
     }
     
@@ -252,7 +228,8 @@ public class Main extends Activity implements ManetObserver {
     	}
     }
         
-    private void updateChannelList() {
+    @Override
+    protected void updateChannelList() {
     	channels = ChannelHelper.getChannels();
  		
 		ArrayAdapter<Channel> adapter = 
@@ -473,51 +450,4 @@ public class Main extends Activity implements ManetObserver {
         	})
         	.show();  		
    	}
-
-	public void onServiceConnected() {
-		// Update channel list
-		channelRunnable = new Runnable() {
-			
-			public void run() {					
-				manet.sendPeersQuery();
-				handler.postDelayed(this, CHANNEL_CHECK_PERIOD_MILLISEC);
-			}
-		};
-		
-		handler.removeCallbacks(channelRunnable);
-		handler.postDelayed(channelRunnable, STATE_CHECK_PERIOD_MILLISEC);
-	}
-
-	public void onServiceDisconnected() {
-		handler.removeCallbacks(channelRunnable);
-	}
-
-	public void onServiceStarted() {
-		// TODO Auto-generated method stub
-	}
-
-	public void onServiceStopped() {
-		// TODO Auto-generated method stub
-	}
-
-	public void onAdhocStateUpdated(AdhocStateEnum state, String info) {
-		// TODO Auto-generated method stub
-	}
-
-	public void onConfigUpdated(ManetConfig manetcfg) {
-		// TODO Auto-generated method stub
-	}
-	
-	public void onRoutingInfoUpdated(String info) {
-		// TODO Auto-generated method stub
-	}
-
-	public void onPeersUpdated(HashSet<Node> peers) {
-		ChannelHelper.updateChannels(peers);
-		updateChannelList();
-	}
-
-	public void onError(String error) {
-		// TODO Auto-generated method stub
-	}
 }
