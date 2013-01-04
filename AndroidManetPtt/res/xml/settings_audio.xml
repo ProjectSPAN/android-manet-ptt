@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">			
+		<CheckBoxPreference 
+			android:key="use_speex"
+			android:title="@string/use_speex_title"
+			android:defaultValue="false"
+			android:summaryOn="@string/use_speex_on"
+			android:summaryOff="@string/use_speex_off" />								
+		
+		<ListPreference 
+			android:key="speex_quality"
+			android:dependency="use_speex"
+			android:title="@string/speex_quality_title"
+			android:summary="@string/speex_quality_summary"
+			android:entries="@array/speex_quality"
+			android:entryValues="@array/speex_quality_values"
+			android:defaultValue="10" />		
+			
+		<CheckBoxPreference 
+			android:key="echo"
+			android:title="@string/echo_title"
+			android:defaultValue="false"
+			android:summaryOn="@string/echo_on"
+			android:summaryOff="@string/echo_off" />
+		
+		<CheckBoxPreference 
+			android:key="speaker"
+			android:title="@string/speaker_title"
+			android:defaultValue="true"
+			android:summaryOn="@string/speaker_on"
+			android:summaryOff="@string/speaker_off" />	
+			
+		<CheckBoxPreference 
+			android:key="talkover"
+			android:title="@string/talk_over_title"
+			android:defaultValue="false"
+			android:summaryOn="@string/talk_over_on"
+			android:summaryOff="@string/talk_over_off" />	
+		
+</PreferenceScreen>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">pttdroid</string>
+    <string name="settings_name">pttdroid Settings</string>
+    <string name="settings_label">Settings</string>
+    <string name="settings_comm_name">Communication Settings</string>
+    <string name="settings_comm_label">Communication</string>
+    <string name="set_cast_and_port">Cast &amp; port</string>
+    <string name="cast_type_title">Cast type</string>
+    <string name="cast_type_summary">Choose how many devices will receive the audio data.</string>
+    <string name="port_title">Port</string>
+    <string name="port_summary"></string>
+    <string name="port_default">2010</string>
+    <string name="set_ip_addr">IP addresses</string>
+    <string name="broadcast_addr_title">Broadcast address</string>
+    <string name="broadcast_addr_summary">Audio data will be received by all devices witch are on the same network.</string>
+    <string name="broadcast_addr_default">255.255.255.255</string>
+    <string name="multicast_addr_title">Multicast address</string>
+    <string name="multicast_addr_summary">Audio data will be received only by devices registered on the given address and are on the same network.</string>
+    <string name="multicast_addr_default">230.0.0.1</string>
+    <string name="unicast_addr_title">Unicast address</string>
+    <string name="unicast_addr_summary">Audio data will be received only by one device, designated by the given address.</string>
+    <string name="unicast_addr_default">192.168.0.1</string>
+    <string name="settings_audio_name">Audio Settings</string>
+    <string name="settings_audio_label">Audio</string>
+    <string name="use_speex_title">Use codec</string>
+    <string name="use_speex_on">Codec on</string>
+    <string name="use_speex_off">Codec off</string>
+    <string name="speex_quality_title">Codec bit rate</string>
+    <string name="speex_quality_summary"></string>
+    <string name="echo_title">Echo</string>
+    <string name="echo_on">Echo on</string>
+    <string name="echo_off">Echo off</string>
+    <string name="speaker_title">Device speaker</string>
+    <string name="speaker_on">Device speaker on</string>
+    <string name="speaker_off">Device speaker off (handset mode)</string>
+    <string name="talk_over_title">Multiple speakers</string>
+    <string name="talk_over_on">Can talk over fellow peers</string>
+    <string name="talk_over_off">Can\'t talk over fellow peers</string>
+    <string name="vpn_title">Mesh P2P VPN</string>
+    <string name="vpn_on">Use mesh P2P VPN</string>
+    <string name="vpn_off">Don\'t use mesh P2P VPN</string>
+    <string name="settings_reset_all_name">Reset All</string>
+    <string name="settings_reset_all_label">Reset All</string>
+    <string name="setting_reset_all_confirm">All settings were restored to their default values</string>
+    <string name="groups_label">Groups</string>
+    <string name="group_create_label">Create Group</string>
+    <string name="group_create_name">Create Group</string>
+    <string name="groups_view_label">View Groups</string>
+    <string name="groups_view_name">View Groups</string>
+    <string name="group_view_label">View Group</string>
+    <string name="group_view_name">View Group</string>
+    <string name="channel_label">Channel Info</string>
+    <string name="channel_view_name">View Channel</string>
+    <string name="prompt_channel">Select a Mode, Group, or Peer</string>
+</resources>
