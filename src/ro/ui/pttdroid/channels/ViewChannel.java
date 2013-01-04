@@ -44,7 +44,7 @@ public class ViewChannel extends PeersQueryActivity {
  			myChannels.addAll(groupChannel.channels);
  		}
 		
-		adapter = new ChannelAdapter(this, myChannels);
+		adapter = new ChannelAdapter(this, R.layout.listchannelrow, myChannels);
 		mainListView.setAdapter(adapter);
  		mainListView.setItemsCanFocus(false);
  		mainListView.setChoiceMode(ListView.CHOICE_MODE_NONE); // TODO

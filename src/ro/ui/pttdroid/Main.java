@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import ro.ui.pttdroid.channels.Channel;
+import ro.ui.pttdroid.channels.ChannelAdapter;
 import ro.ui.pttdroid.channels.ChannelHelper;
 import ro.ui.pttdroid.channels.GroupChannel;
 import ro.ui.pttdroid.channels.ListenOnlyChannel;
@@ -19,12 +20,7 @@ import ro.ui.pttdroid.recorder.SingleRecorder;
 import ro.ui.pttdroid.service.ConnectionService;
 import ro.ui.pttdroid.settings.AudioSettings;
 import ro.ui.pttdroid.settings.CommSettings;
-import android.adhoc.manet.ManetHelper;
-import android.adhoc.manet.ManetObserver;
-import android.adhoc.manet.routing.Node;
-import android.adhoc.manet.service.ManetService.AdhocStateEnum;
-import android.adhoc.manet.system.ManetConfig;
-import android.app.Activity;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -43,7 +39,6 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -62,11 +57,10 @@ public class Main extends PeersQueryActivity {
 	 * True if the activity is really starting for the first time.
 	 * False if the activity starts after it was previously closed by a configuration change, like screen orientation. 
 	 */
-	private static boolean isStarting = true;	
+	private static boolean isStarting = true;
 	
 	private ImageView microphoneImage = null;
 	private Spinner spnChannel = null;
-	private ImageButton btnInfo = null;
 	
 	private List<Channel> channels = null;
 	private Channel channel = null;
@@ -101,7 +95,7 @@ public class Main extends PeersQueryActivity {
 				if (!selection.equals(channel)) {
 					channel = selection;
 					ChannelHelper.setCurrentChannel(channel);
-					updateChannelStatus();
+					// updateChannelStatus(); // TODO?
 					pttReset();
 				}
 			}
@@ -110,28 +104,6 @@ public class Main extends PeersQueryActivity {
 				// TODO Auto-generated method stub
 			}
     	});
-    	
-    	/*
-    	spnChannel.setOnTouchListener(new OnTouchListener() {
-    		public boolean onTouch(View view, MotionEvent event) {	
-	    		switch(event.getAction()) {
-		    		case MotionEvent.ACTION_DOWN:
-		    			// update spinner contents here so as not to confuse the user
-		    			// by removing the current channel from the list mid-use
-		    			updateChannelList();
-		    			break;
-	    		}
-		    	return false; // don't consume event so that spinner behaves normally 
-			}
-    	});
-    	*/
-    	
-    	btnInfo = (ImageButton) findViewById(R.id.btnInfo);
-    	btnInfo.setOnClickListener(new View.OnClickListener() {
-	  		public void onClick(View v) {
-	  			viewChannel();
-	  		}
-		});
     	
     	microphoneImage = (ImageView) findViewById(R.id.microphone_image);
     	microphoneImage.setOnTouchListener(new OnTouchListener() {
@@ -232,26 +204,23 @@ public class Main extends PeersQueryActivity {
     protected void updateChannelList() {
     	channels = ChannelHelper.getChannels();
  		
+    	/*
 		ArrayAdapter<Channel> adapter = 
 				new ArrayAdapter<Channel>(this, android.R.layout.simple_spinner_item, channels);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		*/
+    	
+    	ChannelAdapter adapter = new ChannelAdapter(this, R.layout.spinnerchannelrow, channels);
 		spnChannel.setAdapter(adapter);
 		
-		adapter.notifyDataSetChanged();
+		adapter.notifyDataSetChanged(); // force redraw
 		
 		// maintain channel selection
 		if (channel == null) {
 			channel = ChannelHelper.getDefaultChannel();
 		}
-		int index = adapter.getPosition(channel);
+		int index = channels.indexOf(channel);
 		spnChannel.setSelection(index);
-		
-    	updateChannelStatus();
-    }
-    
-    private void updateChannelStatus() {    	
-		int resource = ChannelHelper.getChannelStatusResource(channel);
-		btnInfo.setImageResource(resource);
     }
     
     /**

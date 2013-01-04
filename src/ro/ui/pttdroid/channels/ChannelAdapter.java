@@ -15,10 +15,13 @@ import android.widget.TextView;
 public class ChannelAdapter extends BaseAdapter {
     private Context context;
 
+    private int resource = -1;
+    
     private List<Channel> channels;
 
-    public ChannelAdapter(Context context, List<Channel> channels) {
+    public ChannelAdapter(Context context, int resource, List<Channel> channels) {
         this.context = context;
+        this.resource = resource;
         this.channels = channels;
     }
 
@@ -39,7 +42,7 @@ public class ChannelAdapter extends BaseAdapter {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.channelrow, null);
+            convertView = inflater.inflate(resource, null);
         }
         
         TextView tvName = (TextView) convertView.findViewById(R.id.tvName);

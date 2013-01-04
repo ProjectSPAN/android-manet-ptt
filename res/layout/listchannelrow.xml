@@ -11,8 +11,8 @@
     	android:minHeight="?android:attr/listPreferredItemHeight"
     	android:background="@android:color/transparent" />
     
-    <include layout="@layout/simpletextitem"
+    <include layout="@layout/listtextitem"
         android:id="@+id/tvName"
-       	android:layout_weight="1"/>
+       	android:layout_weight="1" />
 			
 </LinearLayout>

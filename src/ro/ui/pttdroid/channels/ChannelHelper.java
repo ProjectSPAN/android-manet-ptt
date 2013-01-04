@@ -57,7 +57,6 @@ public class ChannelHelper {
 		
 		// order channels
 		List<Channel> ordered 	= new ArrayList<Channel>();
-		List<Channel> modes 	= new ArrayList<Channel>();
 		List<Channel> peers 	= new ArrayList<Channel>();
 		List<Channel> groups 	= new ArrayList<Channel>();
 		
@@ -66,16 +65,15 @@ public class ChannelHelper {
 				peers.add(c);
 			} else if (c instanceof GroupChannel) {
 				groups.add(c);
-			} else {
-				modes.add(c);
 			}
 		}
 		
-		Collections.sort(modes);
 		Collections.sort(groups);
 		Collections.sort(peers);
 		
-		ordered.addAll(modes);
+		ordered.add(getNullChannel());
+		ordered.add(getListenOnlyChannel());
+		
 		ordered.addAll(groups);
 		ordered.addAll(peers);
 		

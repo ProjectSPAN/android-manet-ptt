@@ -60,7 +60,7 @@ public class ViewGroups extends ListActivity {
 	
 	private void showGroups() {
 		ArrayAdapter<Group> adapter = 
-				new ArrayAdapter<Group>(this, R.layout.simpletextitem, groups);
+				new ArrayAdapter<Group>(this, R.layout.listtextitem, groups);
 		mainListView.setAdapter(adapter);
  		mainListView.setItemsCanFocus(false);
  		mainListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
