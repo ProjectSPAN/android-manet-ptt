@@ -39,11 +39,11 @@ public class AudioSettings extends PreferenceActivity {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		Resources res = context.getResources();
 		
-    	useSpeex = prefs.getBoolean("use_speex", USE_SPEEX);    		    		
+    	useSpeex = prefs.getBoolean("use_speex", DONT_USE_SPEEX);    		    		
     	speexQuality = Integer.parseInt(prefs.getString("speex_quality", 
     			res.getStringArray(R.array.speex_quality_values)[0]));
     	echoState = prefs.getBoolean("echo", ECHO_OFF);    		
-    	speakerState = prefs.getBoolean("speaker", SPEAKER_OFF);   
+    	speakerState = prefs.getBoolean("speaker", SPEAKER_ON);   
     	talkOverState = prefs.getBoolean("talkover", TALK_OVER_OFF);  
 	}
 	
