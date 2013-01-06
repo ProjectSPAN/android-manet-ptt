@@ -101,7 +101,7 @@ public class ConnectionService extends Service {
     	}
 
     	// set the info for the views that show in the notification panel    
-    	notification.setLatestEventInfo(this, "pttdroid", content, pendingIntent);
+    	notification.setLatestEventInfo(this, "MANET Voice Chat", content, pendingIntent);
     	
     	// send the notification        
     	notificationManager.notify(NOTIFICATION_ID, notification);

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">pttdroid</string>
-    <string name="settings_name">pttdroid Settings</string>
+    <string name="app_name">MANET Voice Chat</string>
     <string name="settings_label">Settings</string>
     <string name="settings_comm_name">Communication Settings</string>
     <string name="settings_comm_label">Communication</string>

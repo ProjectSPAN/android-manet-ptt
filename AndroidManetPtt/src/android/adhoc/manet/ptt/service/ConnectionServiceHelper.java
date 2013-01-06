@@ -27,6 +27,6 @@ public class ConnectionServiceHelper {
 	}
 	
 	public void setup() {
-		service.showNotification("pttdroid is running"); // TODO: use strings.xml
+		service.showNotification("Push to talk service is running."); // TODO: use strings.xml
 	}
 }
