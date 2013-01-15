@@ -38,6 +38,22 @@ public abstract class PeersQueryActivity extends Activity implements ManetObserv
 			manet.connectToService();
         }
     }
+    
+    @Override
+    public void onResume() {
+    	super.onResume();
+    	
+    	if (manet.isConnectedToService()) {
+    		handler.removeCallbacks(channelRunnable);
+    		handler.post(channelRunnable); // run now
+    	}
+    }
+    
+    @Override
+    public void onPause() {
+    	super.onPause();
+		handler.removeCallbacks(channelRunnable);
+    }
                 
     @Override
     public void onDestroy() {

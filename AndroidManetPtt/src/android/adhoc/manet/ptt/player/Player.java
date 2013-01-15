@@ -22,7 +22,7 @@ import android.media.AudioTrack;
 import android.util.Log;
 
 public class Player implements Runnable {
-		
+	
 	private static final int SOCKET_TIMEOUT_MILLISEC = 1000;
 	
 	private Map<InetAddress,AudioTrack> trackMap;
@@ -76,6 +76,12 @@ public class Player implements Runnable {
 					}
 					*/
 					
+					// TODO: check if this is a probe request
+					if (packet.getLength() == 0) {
+						Log.d("Player", "PROBE REQUEST!");
+						continue; // drop packet on floor
+					}
+					
 					// filter audio data to separate tracks based on sender address
 					InetAddress sender = packet.getAddress();
 					if (trackMap.containsKey(sender)) {
@@ -85,12 +91,12 @@ public class Player implements Runnable {
 						// filter out packets from everyone but peer(s)
 						if (channel instanceof PeerChannel) {
 							if (!channel.addr.getHostAddress().equals(sender.getHostAddress())) {
-								break; // drop packet on floor
+								continue; // drop packet on floor
 							}
 						} else if (channel instanceof GroupChannel) {
 							GroupChannel groupChannel = (GroupChannel) channel;
 							if (!groupChannel.group.containsHostAddress(sender.getHostAddress())) {
-								break; // drop packet on floor
+								continue; // drop packet on floor
 							}
 						}
 						// ListenOnlyChannel doesn't filter
@@ -121,7 +127,7 @@ public class Player implements Runnable {
 					
 					// If echo is turned off and I was the packet sender then skip playing
 					if(AudioSettings.getEchoState() == AudioSettings.ECHO_OFF && PhoneIPs.contains(packet.getAddress())) // TODO
-						continue;
+						continue; // drop packet on floor
 					
 					// Decode audio
 					if(AudioSettings.useSpeex() == AudioSettings.USE_SPEEX) {

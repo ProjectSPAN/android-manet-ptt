@@ -246,8 +246,19 @@ public class ChannelHelper {
 		
 		// groups
 		List<Group> groups = GroupHelper.getGroups();
+		List<Channel> groupChannels = new ArrayList<Channel>();
 		for (Group group : groups) {
 			c = getGroupChannel(group);
+			groupChannels.add(c);
+		}
+		
+		List<Channel> copy = new ArrayList<Channel>(channels);
+		for (Channel gc : copy) {
+			if (gc instanceof GroupChannel) {
+				if (!groupChannels.contains(gc)) {
+					channels.remove(gc); // group was removed
+				}
+			}
 		}
 				
 		updateGroupChannelStatuses();
