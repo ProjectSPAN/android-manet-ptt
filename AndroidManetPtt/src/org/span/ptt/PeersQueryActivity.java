@@ -4,16 +4,20 @@ import java.util.HashSet;
 
 
 import org.span.ptt.channels.ChannelHelper;
+import org.span.ptt.service.ConnectionService;
 import org.span.service.ManetHelper;
 import org.span.service.ManetObserver;
+import org.span.service.legal.EulaHelper;
+import org.span.service.legal.EulaObserver;
 import org.span.service.routing.Node;
 import org.span.service.core.ManetService.AdhocStateEnum;
 import org.span.service.system.ManetConfig;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 
-public abstract class PeersQueryActivity extends Activity implements ManetObserver {
+public abstract class PeersQueryActivity extends Activity implements EulaObserver, ManetObserver {
 	
 	private ManetHelper manet = null;
 	
@@ -28,15 +32,9 @@ public abstract class PeersQueryActivity extends Activity implements ManetObserv
         
 		manet = new ManetHelper(this);
 	    manet.registerObserver(this);
-    }
-    
-    @Override
-    public void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        
-        if (!manet.isConnectedToService()) {
-			manet.connectToService();
-        }
+	    
+        EulaHelper eula = new EulaHelper(this, this);
+        eula.showDialog();
     }
     
     @Override
@@ -68,6 +66,17 @@ public abstract class PeersQueryActivity extends Activity implements ManetObserv
     
     protected abstract void updateChannelList();
        
+	public void onEulaAccepted() {
+		// used to be part of onPostCreate()
+        if (!manet.isConnectedToService()) {
+			manet.connectToService();
+        }
+        
+   		// start service so that it runs even if no active activities are bound to it
+        // do nothing if the service is already running
+   		startService(new Intent(this, ConnectionService.class));
+	}
+    
 	public void onServiceConnected() {
 		// Update channel list
 		channelRunnable = new Runnable() {

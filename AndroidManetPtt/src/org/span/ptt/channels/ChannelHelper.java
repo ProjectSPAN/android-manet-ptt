@@ -47,7 +47,7 @@ public class ChannelHelper {
 	}
 	
 	public static Channel getDefaultChannel() {
-		return getListenOnlyChannel();
+		return getNullChannel(); // in case user declines EULA
 	}
 	
 	public static List<Channel> getChannels() {

@@ -18,6 +18,8 @@ import org.span.ptt.recorder.SingleRecorder;
 import org.span.ptt.service.ConnectionService;
 import org.span.ptt.settings.AudioSettings;
 import org.span.ptt.settings.CommSettings;
+import org.span.service.legal.EulaHelper;
+import org.span.service.legal.EulaObserver;
 
 import ro.ui.pttdroid.codecs.Speex;
 
@@ -137,9 +139,6 @@ public class Main extends PeersQueryActivity {
     	
     	channel = ChannelHelper.getChannel(); // TODO
     	
-   		// start service so that it runs even if no active activities are bound to it
-   		startService(new Intent(this, ConnectionService.class));
-		
         pttInit();
     }
     
@@ -417,6 +416,6 @@ public class Main extends PeersQueryActivity {
                 	// nothing to do
                 }
         	})
-        	.show();  		
+        	.show();
    	}
 }
