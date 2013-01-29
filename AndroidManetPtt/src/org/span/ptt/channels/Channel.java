@@ -17,11 +17,12 @@ public abstract class Channel implements Comparable<Channel> {
 	public static final int MULTICAST = 1;
 	public static final int UNICAST   = 2;
 	
-	public static final int DEFAULT_PORT = 2011;
+	public static final int VOICE_PORT = 2011;
+	public static final int PROBE_PORT = 2012;
 	
 	public String name = null;
 	
-	public int port = DEFAULT_PORT;
+	public int port = VOICE_PORT;
 	public InetAddress addr = null;
 	
 	public int status = BAD_STATUS;

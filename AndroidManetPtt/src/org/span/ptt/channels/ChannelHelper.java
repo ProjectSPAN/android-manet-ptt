@@ -1,11 +1,16 @@
 package org.span.ptt.channels;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.span.ptt.R;
 import org.span.ptt.groups.Group;
@@ -36,6 +41,13 @@ public class ChannelHelper {
 	private static Channel channel = null;
 	
 	private static SharedPreferences prefs = null;
+	
+	private static Map<Node, ProbeThread> probeMap = new HashMap<Node, ProbeThread>();
+	
+	static {
+		ProbeListenerThread probeListenerThread = new ProbeListenerThread();
+		probeListenerThread.start();
+	}
 	
 	public static void getSettings(Context context) {
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -238,12 +250,18 @@ public class ChannelHelper {
 		// peers
 		// NOTE: always update peer channels before group channels
 		if (peers != null) {
+			ProbeThread probeThread = null;
 			for (Node peer : peers) {
-				c = getPeerChannel(peer);
-				c.setStatus(Channel.GOOD_STATUS);
+				// c = getPeerChannel(peer);
+				// c.setStatus(Channel.GOOD_STATUS);
+				if (!probeMap.containsKey(peer)) {
+					probeThread = new ProbeThread(peer);
+					probeMap.put(peer, probeThread);
+					probeThread.start();
+				}
 			}
 		}
-		
+
 		// groups
 		List<Group> groups = GroupHelper.getGroups();
 		List<Channel> groupChannels = new ArrayList<Channel>();
@@ -323,5 +341,84 @@ public class ChannelHelper {
  			}
 		}
 		return resource;
+    }
+    
+    // inner classes
+    
+    private static class ProbeThread extends Thread {
+    	
+    	private final int SO_TIMEOUT_MILLISEC = 5000;
+    	
+    	private Node peer = null;
+    	
+    	public ProbeThread(Node peer) {
+    		this.peer = peer;
+    	}
+    	
+    	@Override
+    	public void run() {
+			Channel c = getPeerChannel(peer);
+    		DatagramSocket socket = null;
+    		
+    		try {    			
+    			socket = new DatagramSocket();
+    			socket.setSoTimeout(SO_TIMEOUT_MILLISEC);
+    			
+    			DatagramPacket txpacket = 
+    				new DatagramPacket(new byte[0], 0, c.addr, Channel.PROBE_PORT);
+    			socket.send(txpacket);
+    			
+    			byte rxdata[] = new byte[1];
+    			DatagramPacket rxpacket = new DatagramPacket(rxdata, rxdata.length);	
+    			socket.receive(rxpacket); // blocking
+    			
+    			if (rxdata[0] == 1) {
+    				c.setStatus(Channel.GOOD_STATUS);
+    			} else {
+    				c.setStatus(Channel.BAD_STATUS);
+    			}
+    		} catch (SocketTimeoutException e) {
+    			c.setStatus(Channel.BAD_STATUS);
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		} finally {
+    			if(socket != null) {
+    				socket.close();
+    			}
+    			probeMap.remove(peer);
+    		}
+    	}
+    }
+    
+    private static class ProbeListenerThread extends Thread {
+    	
+    	private final int SO_TIMEOUT_MILLISEC = 0;
+    	
+    	@Override
+    	public void run() {
+    		DatagramSocket socket = null;
+    		
+    		try {
+    			socket = new DatagramSocket(Channel.PROBE_PORT);
+    			socket.setSoTimeout(SO_TIMEOUT_MILLISEC); // wait forever
+    			
+    			DatagramPacket rxpacket = new DatagramPacket(new byte[0], 0);
+    			
+    			while (true) {
+	    			socket.receive(rxpacket); // blocking
+	    			
+	    			byte txdata[] = {1};
+	    			DatagramPacket txpacket = new DatagramPacket(txdata, txdata.length, rxpacket.getAddress(), rxpacket.getPort());
+	    			
+	    			socket.send(txpacket);
+    			}
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		} finally {
+    			if(socket != null) {
+    				socket.close();
+    			}
+    		}
+    	}
     }
 }

@@ -61,7 +61,7 @@ public class SingleRecorder extends Recorder {
 			// bind to any available local port; don't care since we're not rxing, only txing
 			// receiver addr and port specified in packet; don't connect to remote host
 			socket = new DatagramSocket();
-			socket.setSoTimeout(SO_TIMEOUT);	
+			socket.setSoTimeout(SO_TIMEOUT_MILLISEC);	
 		}
 		catch(SocketException e) {
 			e.printStackTrace();

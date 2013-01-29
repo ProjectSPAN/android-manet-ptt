@@ -77,12 +77,6 @@ public class Player implements Runnable {
 					}
 					*/
 					
-					// TODO: check if this is a probe request
-					if (packet.getLength() == 0) {
-						Log.d("Player", "PROBE REQUEST!");
-						continue; // drop packet on floor
-					}
-					
 					// filter audio data to separate tracks based on sender address
 					InetAddress sender = packet.getAddress();
 					if (trackMap.containsKey(sender)) {

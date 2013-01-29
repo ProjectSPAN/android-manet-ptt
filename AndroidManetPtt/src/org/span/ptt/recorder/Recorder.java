@@ -12,7 +12,7 @@ import android.media.MediaRecorder.AudioSource;
 
 public abstract class Recorder implements Runnable {
 	
-	protected final int SO_TIMEOUT = 0;
+	protected final int SO_TIMEOUT_MILLISEC = 0;
 
 	protected Channel channel = null;
 	
