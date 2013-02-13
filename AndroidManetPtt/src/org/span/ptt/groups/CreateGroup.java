@@ -209,11 +209,6 @@ public class CreateGroup extends ListActivity implements ManetObserver {
 			options.add(option);
 		}
 		
-		// DEBUG: TEST
-		options.add("moo");
-		options.add("bark");
-		options.add("meow");
-		
  		// Bind the data with the list
 		String[] lv_array = new String[options.size()]; 
 		options.toArray(lv_array);

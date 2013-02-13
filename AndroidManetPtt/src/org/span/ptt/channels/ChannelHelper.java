@@ -233,11 +233,6 @@ public class ChannelHelper {
 	}
 	
 	public static void updateChannels(HashSet<Node> peers) {
-		// clear channel statuses
-		for (Channel c : channels) {
-			c.setStatus(Channel.BAD_STATUS);
-		}
-		
 		Channel c = null;
 		
 		// special channels
